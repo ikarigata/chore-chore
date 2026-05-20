@@ -1,0 +1,12 @@
+{
+  "name": "iezi-root",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "dependencies": {
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,9 @@
+// backend/tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@iezi/shared": ["../shared/src"]
+    }
+  }
+}

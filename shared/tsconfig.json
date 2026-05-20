@@ -1,0 +1,7 @@
+// shared/tsconfig.json
+{
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "dist"
+  }
+}
