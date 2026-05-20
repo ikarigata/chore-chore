@@ -21,7 +21,7 @@
 * **DynamoDB操作**: Query
     * PK: `FamilyID` を完全一致で指定します。
     * SK: `begins_with("USER#")` と `begins_with("TASK#")` を指定します。
-    * 実装のポイント: DynamoDBの1回のQueryでは1つの条件しか指定できないため、シンプルにPKを指定して全体を取得するか、ユーザー用とタスク用で2回並列でQueryを投げる（GoのGoroutineなどを活用する）処理を行います。
+    * 実装のポイント: DynamoDBの1回のQueryでは1つの条件しか指定できないため、シンプルにPKを指定して全体を取得するか、ユーザー用とタスク用で2回並列でQueryを投げる（`Promise.all` などを活用する）処理を行います。
 
 ### 2.2. 家事完了API ⚠️最重要
 

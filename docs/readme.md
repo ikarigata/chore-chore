@@ -10,14 +10,14 @@ AWSのマネージドサービスをフル活用したモダンな「完全サ�
 フロントエンドからインフラ管理まで、実務レベルのスケーラビリティと保守性を意識した技術スタックを採用しています。
 
 - **フロントエンド**: React (サーバーサイドレンダリングなし) 。
-- **バックエンド**: Amazon API Gateway + AWS Lambda (Go言語 / ファットLambda構成) 。
+- **バックエンド**: Amazon API Gateway + AWS Lambda (TypeScript / Node.js / ファットLambda構成) 。
 - **データベース**: Amazon DynamoDB 。
 - **認証**: Amazon Cognito (CognitoサブをユーザーIDとして使用) 。
 - **インフラ構築**: Terraform (HCLを使用) 。
 
 ### 💡 構成のハイライト
 
-- **Go言語によるファットLambda**: コンパイルされた単一のバイナリファイルとなるため、起動速度を保ちつつインフラ管理をシンプルにしています 。
+- **TypeScript ファットLambda**: esbuild で単一ファイルにバンドルするため、インフラ管理をシンプルに保ちつつ高速なコールドスタートを実現しています 。
 - **Cognito Authorizer**: API Gatewayの入り口でCognitoオーソライザーによるアクセス保護を行うことで、不正なリクエストをLambdaの手前でブロックします 。
 
 ## 🗄️ データベース設計 (DynamoDB)

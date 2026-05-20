@@ -22,7 +22,7 @@
 [Amazon API Gateway (HTTP API)] (Cognito JWT Authorizerによる入口での認証検証)
      │ (安全なコンテキスト / CognitoSub の伝播)
      ▼
-[AWS Lambda (メインAPI)] (Go言語ファットLambdaによるビジネスロジック・同期トランザクション処理)
+[AWS Lambda (メインAPI)] (TypeScript ファットLambdaによるビジネスロジック・同期トランザクション処理)
      │ (データ永続化 / 同時書き込みトランザクション)
      ▼
 [Amazon DynamoDB] (シングルテーブル設計)
@@ -33,7 +33,7 @@
 プロジェクトは1つのリポジトリでフロントからインフラまでを一元管理するモノレポ構成をとります。
 
 - `frontend/`: ReactによるSPAプロジェクト
-- `backend/`: Go言語によるLambdaソースコード
+- `backend/`: TypeScriptによるLambdaソースコード
 - `infrastructure/`: TerraformによるHCLインフラストラクチャ定義
 
 ## 3. インフラコンポーネント仕様
@@ -60,8 +60,8 @@
 ### 3.3. コンピューティング層（AWS Lambda）
 
 - **役割**: アプリケーションのビジネスロジックの実行。
-- **構成方針 (ファットLambda)**: 全てのエンドポイントの処理ロジックを単一のGo言語Lambda関数に集約します。Go言語特有の「コンパイルによる単一バイナリ生成」の恩恵を活かし、インフラ定義のシンプル化と爆速なコールドスタートを両立します。
-- **JWTクレーム取得**: HTTP APIのJWT Authorizer経由で渡されるイベントの `event.RequestContext.Authorizer.JWT.Claims` から `sub` を抽出し、ユーザー識別子として利用します。
+- **構成方針 (ファットLambda)**: 全てのエンドポイントの処理ロジックを単一の TypeScript Lambda 関数に集約します。esbuild による単一ファイルへのバンドルにより、インフラ定義のシンプル化と高速なコールドスタートを両立します。ランタイムは **Node.js 22.x** を使用します。
+- **JWTクレーム取得**: HTTP API V2 イベントの `event.requestContext.authorizer?.jwt?.claims?.sub` から `CognitoSub` を抽出し、ユーザー識別子として利用します。
 
 ### 3.4. データベース層（Amazon DynamoDB）
 
@@ -108,7 +108,7 @@
 - `s3.tf`: 静的アセット用バケット（パブリックアクセス全ブロック、OACからのみ許可）
 - `dynamodb.tf`: テーブル（FamilyAppTable）、オンデマンドモード、TTL属性、PITRの設定
 - `cognito.tf`: ユーザープールおよびクライアント連携設定
-- `lambda.tf`: Go言語用ファットLambda（API用）の定義
+- `lambda.tf`: TypeScript ファットLambda（API用、Node.js 22.x ランタイム）の定義
 - `apigateway.tf`: HTTP API、プロキシ統合（ANY）、CORS、Cognito JWT Authorizer設定
 - `iam_github_oidc.tf`: GitHub Actionsからのデプロイ用OIDC IDプロバイダーおよびデプロイロール定義
 
