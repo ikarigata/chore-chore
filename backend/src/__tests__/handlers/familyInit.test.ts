@@ -13,8 +13,8 @@ describe('familyInitHandler', () => {
   })
 
   it('ユーザーと家事リストを返す', async () => {
-    repo.users = [{ cognitoSub: 'sub-1', displayName: '太郎', icon: 'icon1', totalPoints: 100 }]
-    repo.taskMasters = [{ taskId: 'task-1', taskName: 'お風呂掃除', points: 10, icon: 'bath' }]
+    repo.users = [{ cognitoSub: 'sub-1', displayName: '太郎', totalPoints: 100 }]
+    repo.taskMasters = [{ taskId: 'task-1', taskName: 'お風呂掃除', points: 10 }]
 
     const res = await familyInitHandler(CTX, REQ, { familyRepo: repo })
 

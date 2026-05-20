@@ -14,7 +14,7 @@ describe('taskExecuteHandler', () => {
 
   beforeEach(() => {
     repo = new MockFamilyRepository()
-    repo.taskMasterMap.set('task-1', { taskId: 'task-1', taskName: 'お風呂掃除', points: 10, icon: 'bath' })
+    repo.taskMasterMap.set('task-1', { taskId: 'task-1', taskName: 'お風呂掃除', points: 10 })
   })
 
   it('家事を記録して 200 を返す', async () => {

@@ -17,7 +17,7 @@ describe('taskUpsertHandler', () => {
   })
 
   it('家事設定を保存して 200 を返す', async () => {
-    const body = { taskId: 'task-1', taskName: 'ゴミ出し', points: 5, icon: 'trash' }
+    const body = { taskId: 'task-1', taskName: 'ゴミ出し', points: 5 }
     const res = await taskUpsertHandler(CTX, makeReq(body), { familyRepo: repo })
 
     expect(res.statusCode).toBe(200)
@@ -30,7 +30,7 @@ describe('taskUpsertHandler', () => {
   it('points が 0 でも保存できる', async () => {
     const res = await taskUpsertHandler(
       CTX,
-      makeReq({ taskId: 't', taskName: '名前', points: 0, icon: 'i' }),
+      makeReq({ taskId: 't', taskName: '名前', points: 0 }),
       { familyRepo: repo },
     )
     expect(res.statusCode).toBe(200)
@@ -38,8 +38,8 @@ describe('taskUpsertHandler', () => {
 
   it('必須フィールドが欠けている場合 400 を投げる', async () => {
     await expect(
-      taskUpsertHandler(CTX, makeReq({ taskId: 't', taskName: '名前', points: 5 }), { familyRepo: repo }),
-    ).rejects.toThrow(new AppError(400, 'taskId、taskName、points、icon は必須です'))
+      taskUpsertHandler(CTX, makeReq({ taskId: 't', taskName: '名前' }), { familyRepo: repo }),
+    ).rejects.toThrow(new AppError(400, 'taskId、taskName、points は必須です'))
   })
 
   it('points が負の場合 400 を投げる', async () => {

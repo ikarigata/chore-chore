@@ -19,7 +19,6 @@
 - **SK形式**: `USER#{CognitoSub}`
 - **主要属性**:
   - `DisplayName` (String): ユーザーの表示名
-  - `Icon` (String): アイコン画像URLなど
   - `TotalPoints` (Number): これまでの獲得総ポイント（★トランザクションで同期加算）
 
 ### ② 家事マスター設定 (`TASK`)
@@ -28,7 +27,6 @@
 - **主要属性**:
   - `TaskName` (String): 家事名（例：「お風呂掃除」）
   - `Points` (Number): 獲得ポイント（例：10）
-  - `Icon` (String): 表示用アイコンID
 
 ### ③ 日次サマリ (`DAILY`)
 「今日誰が何ポイント稼いだか」を即座に表示するためのホットデータです。

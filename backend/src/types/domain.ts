@@ -6,7 +6,6 @@ export type TaskExecutionID = string
 export interface User {
   cognitoSub: CognitoSub
   displayName: string
-  icon: string
   totalPoints: number
 }
 
@@ -14,7 +13,6 @@ export interface TaskMaster {
   taskId: TaskID
   taskName: string
   points: number
-  icon: string
 }
 
 export interface DailySummary {

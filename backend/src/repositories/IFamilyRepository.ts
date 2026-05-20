@@ -30,7 +30,6 @@ export interface UpsertTaskInput {
   taskId: TaskID
   taskName: string
   points: number
-  icon: string
 }
 
 export interface IFamilyRepository {

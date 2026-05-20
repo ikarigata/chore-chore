@@ -10,7 +10,6 @@ interface UpsertBody {
   taskId?: string
   taskName?: string
   points?: number
-  icon?: string
 }
 
 export async function taskUpsertHandler(
@@ -18,16 +17,16 @@ export async function taskUpsertHandler(
   req: HandlerRequest,
   deps: Deps,
 ): Promise<HandlerResponse> {
-  const { taskId, taskName, points, icon } = req.body as UpsertBody
+  const { taskId, taskName, points } = req.body as UpsertBody
 
-  if (!taskId || !taskName || points === undefined || !icon) {
-    throw new AppError(400, 'taskId、taskName、points、icon は必須です')
+  if (!taskId || !taskName || points === undefined) {
+    throw new AppError(400, 'taskId、taskName、points は必須です')
   }
   if (points < 0) {
     throw new AppError(400, 'points は0以上である必要があります')
   }
 
-  await deps.familyRepo.upsertTaskMaster(ctx.familyId, { taskId, taskName, points, icon })
+  await deps.familyRepo.upsertTaskMaster(ctx.familyId, { taskId, taskName, points })
 
   return { statusCode: 200, body: { message: '家事設定を保存しました' } }
 }

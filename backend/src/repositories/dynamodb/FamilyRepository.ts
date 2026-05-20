@@ -33,7 +33,6 @@ function parseUser(item: DynamoItem): User {
   return {
     cognitoSub: sk.slice('USER#'.length),
     displayName: item['DisplayName'] as string,
-    icon: item['Icon'] as string,
     totalPoints: (item['TotalPoints'] as number) ?? 0,
   }
 }
@@ -44,7 +43,6 @@ function parseTaskMaster(item: DynamoItem): TaskMaster {
     taskId: sk.slice('TASK#'.length),
     taskName: item['TaskName'] as string,
     points: item['Points'] as number,
-    icon: item['Icon'] as string,
   }
 }
 
@@ -255,7 +253,6 @@ export class DynamoFamilyRepository implements IFamilyRepository {
           DataSortKey: `TASK#${input.taskId}`,
           TaskName: input.taskName,
           Points: input.points,
-          Icon: input.icon,
         },
       }),
     )

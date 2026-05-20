@@ -66,7 +66,7 @@ DynamoDBの `PutItem` は、データが存在しなければ「作成」、存�
 
 * **エンドポイント**: `PUT /tasks`
 * **目的**: 新しい家事（例：「ゴミ出し 10pt」）を作成する、または既存の家事の設定（ポイント数や名前）を更新します。
-* **リクエストボディ**: `TaskID` (新規の場合はフロントエンドでUUIDを発行)、`TaskName`、`Points`、`Icon` などの設定情報。
+* **リクエストボディ**: `TaskID` (新規の場合はフロントエンドでUUIDを発行)、`TaskName`、`Points`。
 * **DynamoDB操作**: PutItem
     * PK: `FamilyID` を指定します。
     * SK: `TASK#{TaskID}` を指定します。

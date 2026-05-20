@@ -15,7 +15,7 @@ describe('route', () => {
 
   beforeEach(() => {
     repo = new MockFamilyRepository()
-    repo.taskMasterMap.set('task-1', { taskId: 'task-1', taskName: 'test', points: 5, icon: 'i' })
+    repo.taskMasterMap.set('task-1', { taskId: 'task-1', taskName: 'test', points: 5 })
     deps = { familyRepo: repo }
   })
 
@@ -35,7 +35,7 @@ describe('route', () => {
   })
 
   it('PUT /tasks → 200', async () => {
-    const body = { taskId: 't', taskName: '名前', points: 10, icon: 'i' }
+    const body = { taskId: 't', taskName: '名前', points: 10 }
     const res = await route('PUT', '/tasks', CTX, makeReq({ body }), deps)
     expect(res.statusCode).toBe(200)
   })
