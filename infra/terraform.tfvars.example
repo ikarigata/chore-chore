@@ -1,0 +1,15 @@
+# このファイルをコピーして使う:
+#   cp terraform.tfvars.example terraform.tfvars   # ローカル用（.gitignore に追加推奨）
+#   または
+#   cp terraform.tfvars.example staging.tfvars     # 環境別ファイル
+#
+# 使用方法:
+#   terraform plan  -var-file=staging.tfvars
+#   terraform apply -var-file=staging.tfvars
+
+env        = "staging"              # "staging" または "prod"
+aws_region = "ap-northeast-1"       # 変更不要（東京リージョン）
+github_repo = "your-org/iezi"       # GitHub リポジトリ（例: myorg/iezi）
+
+# Lambda ビルド成果物のパス（terraform apply 前に npm run build -w backend を実行）
+# lambda_dist_path = "../backend/dist/index.js"  # デフォルト値のため通常変更不要

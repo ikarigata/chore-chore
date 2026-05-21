@@ -1,5 +1,5 @@
 {
-  "name": "Cajico Dev Environment",
+  "name": "iezi Dev Environment",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
     "ghcr.io/devcontainers/features/go:1": {
@@ -27,5 +27,8 @@
       ]
     }
   },
-  "postCreateCommand": "echo 'DevContainer for Cajico is ready!'"
+  "mounts": [
+    "source=${localEnv:HOME}/.aws,target=/root/.aws,type=bind,consistency=cached"
+  ],
+  "postCreateCommand": "echo 'DevContainer for iezi is ready!'"
 }
