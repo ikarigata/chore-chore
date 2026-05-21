@@ -11,12 +11,12 @@ function makeReq(overrides: Partial<{ pathParams: Record<string, string>; queryP
 
 describe('route', () => {
   let repo: MockFamilyRepository
-  let deps: { familyRepo: MockFamilyRepository }
+  let deps: { familyRepo: MockFamilyRepository; cognitoService: { setFamilyId: () => Promise<void> } }
 
   beforeEach(() => {
     repo = new MockFamilyRepository()
     repo.taskMasterMap.set('task-1', { taskId: 'task-1', taskName: 'test', points: 5 })
-    deps = { familyRepo: repo }
+    deps = { familyRepo: repo, cognitoService: { setFamilyId: async () => {} } }
   })
 
   it('GET /family/init → 200', async () => {

@@ -43,18 +43,18 @@
 ### 実装残タスク
 
 #### バックエンド (`backend/`)
-- [ ] `POST /families` ハンドラ実装
-- [ ] `POST /families/invites` ハンドラ実装
-- [ ] `POST /families/join` ハンドラ実装（`TransactWriteItems` で `FamilyInviteTable` と `FamilyAppTable` を跨ぐ）
-- [ ] ディスパッチ層に「`custom:family_id` クレーム不要エンドポイント」のホワイトリストを追加
-- [ ] Cognito `AdminUpdateUserAttributes` 呼び出しの実装
+- [x] `POST /families` ハンドラ実装
+- [x] `POST /families/invites` ハンドラ実装
+- [x] `POST /families/join` ハンドラ実装（`TransactWriteItems` で `FamilyInviteTable` と `FamilyAppTable` を跨ぐ）
+- [x] ディスパッチ層に「`custom:family_id` クレーム不要エンドポイント」のホワイトリストを追加
+- [x] Cognito `AdminUpdateUserAttributes` 呼び出しの実装
 
 #### インフラ (`infra/`)
-- [ ] `FamilyInviteTable` を Terraform で定義
+- [x] `FamilyInviteTable` を Terraform で定義
   - PK: `Token` (String)
   - TTL: `ExpiresAt` 属性で有効化
-- [ ] Lambda 実行ロールに `cognito-idp:AdminUpdateUserAttributes` 権限を追加
-- [ ] Lambda 実行ロールに `FamilyInviteTable` への読み書き権限を追加
+- [x] Lambda 実行ロールに `cognito-idp:AdminUpdateUserAttributes` 権限を追加
+- [x] Lambda 実行ロールに `FamilyInviteTable` への読み書き権限を追加
 
 #### フロントエンド (`frontend/`)
 - [ ] `/invite?token=xxx` で来た場合、localStorage にトークンを保存

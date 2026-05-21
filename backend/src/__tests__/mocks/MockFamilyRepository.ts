@@ -64,4 +64,12 @@ export class MockFamilyRepository implements IFamilyRepository {
   async deleteTaskMaster(familyId: FamilyID, taskId: TaskID): Promise<void> {
     this.deleteTaskMasterCalls.push([familyId, taskId])
   }
+
+  async createFamily(_familyId: FamilyID, _cognitoSub: CognitoSub, _displayName: string): Promise<void> {}
+
+  async createInvite(_familyId: FamilyID, _token: string, _expiresAt: number): Promise<void> {}
+
+  async consumeInvite(_token: string, _cognitoSub: CognitoSub, _displayName: string): Promise<FamilyID> {
+    return 'fam_mock'
+  }
 }

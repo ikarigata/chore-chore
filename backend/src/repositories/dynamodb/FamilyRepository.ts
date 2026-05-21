@@ -24,7 +24,8 @@ import type {
   User,
 } from '../../types/domain.js'
 
-const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME ?? 'FamilyAppTable'
+const TABLE_NAME = process.env.TABLE_NAME ?? 'FamilyAppTable'
+const INVITE_TABLE_NAME = process.env.INVITE_TABLE_NAME ?? 'FamilyInviteTable'
 
 type DynamoItem = Record<string, unknown>
 
@@ -265,5 +266,98 @@ export class DynamoFamilyRepository implements IFamilyRepository {
         Key: { FamilyID: familyId, DataSortKey: `TASK#${taskId}` },
       }),
     )
+  }
+
+  async createFamily(familyId: FamilyID, cognitoSub: CognitoSub, displayName: string): Promise<void> {
+    try {
+      await this.client.send(
+        new PutCommand({
+          TableName: TABLE_NAME,
+          Item: {
+            FamilyID: familyId,
+            DataSortKey: `USER#${cognitoSub}`,
+            DisplayName: displayName,
+            TotalPoints: 0,
+          },
+          ConditionExpression: 'attribute_not_exists(DataSortKey)',
+        }),
+      )
+    } catch (err) {
+      if ((err as { name?: string }).name === 'ConditionalCheckFailedException') {
+        throw new AppError(409, '既に家族に所属しています')
+      }
+      throw err
+    }
+  }
+
+  async createInvite(familyId: FamilyID, token: string, expiresAt: number): Promise<void> {
+    await this.client.send(
+      new PutCommand({
+        TableName: INVITE_TABLE_NAME,
+        Item: { Token: token, FamilyID: familyId, ExpiresAt: expiresAt },
+      }),
+    )
+  }
+
+  async consumeInvite(token: string, cognitoSub: CognitoSub, displayName: string): Promise<FamilyID> {
+    const getResult = await this.client.send(
+      new GetCommand({ TableName: INVITE_TABLE_NAME, Key: { Token: token } }),
+    )
+    if (!getResult.Item) throw new AppError(410, '招待リンクが見つからないか、期限が切れています')
+
+    const invite = getResult.Item as DynamoItem
+    const expiresAt = invite['ExpiresAt'] as number
+    if (expiresAt < Math.floor(Date.now() / 1000)) {
+      throw new AppError(410, '招待リンクが見つからないか、期限が切れています')
+    }
+
+    const familyId = invite['FamilyID'] as FamilyID
+
+    try {
+      await this.client.send(
+        new TransactWriteCommand({
+          TransactItems: [
+            {
+              Update: {
+                TableName: INVITE_TABLE_NAME,
+                Key: { Token: token },
+                UpdateExpression: 'SET UsedAt = :usedAt, UsedBy = :usedBy',
+                ConditionExpression: 'attribute_not_exists(UsedAt) OR UsedBy = :usedBy',
+                ExpressionAttributeValues: {
+                  ':usedAt': Math.floor(Date.now() / 1000),
+                  ':usedBy': cognitoSub,
+                },
+              },
+            },
+            {
+              Put: {
+                TableName: TABLE_NAME,
+                Item: {
+                  FamilyID: familyId,
+                  DataSortKey: `USER#${cognitoSub}`,
+                  DisplayName: displayName,
+                  TotalPoints: 0,
+                },
+                ConditionExpression: 'attribute_not_exists(DataSortKey)',
+              },
+            },
+          ],
+        }),
+      )
+    } catch (err) {
+      if (err instanceof TransactionCanceledException) {
+        const reasons = err.CancellationReasons ?? []
+        if (reasons[0]?.Code === 'ConditionalCheckFailed') {
+          throw new AppError(409, 'この招待は既に別のユーザーが使用しました')
+        }
+        // reason[1] 失敗 = 同ユーザーの冪等リトライ（USER レコード作成済み）
+        if (reasons[1]?.Code === 'ConditionalCheckFailed') {
+          return familyId
+        }
+      }
+      throw err
+    }
+
+    return familyId
   }
 }

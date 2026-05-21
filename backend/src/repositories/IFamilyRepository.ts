@@ -42,4 +42,7 @@ export interface IFamilyRepository {
   cancelTask(familyId: FamilyID, cognitoSub: CognitoSub, input: CancelTaskInput): Promise<void>
   upsertTaskMaster(familyId: FamilyID, input: UpsertTaskInput): Promise<void>
   deleteTaskMaster(familyId: FamilyID, taskId: TaskID): Promise<void>
+  createFamily(familyId: FamilyID, cognitoSub: CognitoSub, displayName: string): Promise<void>
+  createInvite(familyId: FamilyID, token: string, expiresAt: number): Promise<void>
+  consumeInvite(token: string, cognitoSub: CognitoSub, displayName: string): Promise<FamilyID>
 }

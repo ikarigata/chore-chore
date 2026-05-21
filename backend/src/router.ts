@@ -1,5 +1,8 @@
 import { AppError } from './errors.js'
+import { familyCreateHandler } from './handlers/familyCreate.js'
 import { familyInitHandler } from './handlers/familyInit.js'
+import { familyInviteHandler } from './handlers/familyInvite.js'
+import { familyJoinHandler } from './handlers/familyJoin.js'
 import { historiesHandler } from './handlers/histories.js'
 import { summaryDailyHandler } from './handlers/summaryDaily.js'
 import { taskDeleteHandler } from './handlers/taskDelete.js'
@@ -7,10 +10,12 @@ import { taskExecuteHandler } from './handlers/taskExecute.js'
 import { taskExecuteCancelHandler } from './handlers/taskExecuteCancel.js'
 import { taskUpsertHandler } from './handlers/taskUpsert.js'
 import type { IFamilyRepository } from './repositories/IFamilyRepository.js'
+import type { ICognitoService } from './services/ICognitoService.js'
 import type { HandlerRequest, HandlerResponse, RequestContext } from './types/domain.js'
 
 interface Deps {
   familyRepo: IFamilyRepository
+  cognitoService: ICognitoService
 }
 
 export async function route(
@@ -24,6 +29,12 @@ export async function route(
   const [seg0, seg1] = segments
 
   switch (`${method} /${seg0 ?? ''}`) {
+    case 'POST /families':
+      if (!seg1) return familyCreateHandler(ctx, req, deps)
+      if (seg1 === 'invites') return familyInviteHandler(ctx, req, deps)
+      if (seg1 === 'join') return familyJoinHandler(ctx, req, deps)
+      break
+
     case 'GET /family':
       if (seg1 === 'init') return familyInitHandler(ctx, req, deps)
       break

@@ -109,6 +109,7 @@ resource "aws_lambda_function" "api" {
       TABLE_NAME           = local.family_app_table_name
       INVITE_TABLE_NAME    = local.family_invite_table_name
       COGNITO_USER_POOL_ID = aws_cognito_user_pool.main.id
+      FRONTEND_URL         = "https://${aws_cloudfront_distribution.frontend.domain_name}"
       # AWS SDK の HTTP Keep-Alive を有効化してレイテンシ改善
       AWS_NODEJS_CONNECTION_REUSE_ENABLED = "1"
     }
