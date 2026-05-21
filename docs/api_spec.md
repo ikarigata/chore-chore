@@ -7,6 +7,8 @@
 * **認証・認可**: 全てのエンドポイントはAmazon API GatewayのCognito Authorizerによって保護されます。
     * フロントエンドからリクエストヘッダー (`Authorization`) に乗せて送られてくるJWTをAPI Gatewayの入り口で自動検証します。
     * 認証を通過した安全なリクエストには、ユーザーの一意な識別子 (`CognitoSub`) がコンテキストとして付与され、Lambdaへ安全に引き渡されます。
+    * `CognitoSub` および `custom:family_id` クレームは `event.requestContext.authorizer.jwt.claims` 経由で取得します（HTTP API V2 イベント形式）。
+    * **`custom:family_id` クレームが無くても通すエンドポイント**: `POST /families` と `POST /families/join` の2つだけ。これらはサインアップ直後で `custom:family_id` がまだセットされていない状態で呼ばれるためです。Lambda のディスパッチ層でホワイトリストとして明示的に扱います。
 
 ---
 
@@ -80,7 +82,63 @@ DynamoDBの `PutItem` は、データが存在しなければ「作成」、存�
     * PK: `FamilyID` を指定します。
     * SK: `TASK#{TaskID}` を指定します。
 
-### 2.7. 実績の取り消し（削除）API ⚠️要注意
+### 2.7. 家族作成API（オンボーディング）
+
+最初の1人（招待されていないユーザー）が家族を新規作成するAPIです。
+
+* **エンドポイント**: `POST /families`
+* **目的**: 新しい家族グループを作成し、呼び出し元ユーザーをそのオーナーとして登録します。
+* **JWT 要件**: 必須。ただし `custom:family_id` クレームは **存在しないこと**（既に家族所属の場合は 409 Conflict を返す）。
+* **リクエストボディ**: `{ "displayName": "パパ" }`
+* **レスポンス**: `{ "familyId": "fam_xxx" }`
+* **処理**:
+    1. JWT クレームから `CognitoSub` を取得。`custom:family_id` が既に存在する場合は 409 Conflict。
+    2. UUID で新しい `FamilyID` を発行。
+    3. `FamilyAppTable` に `USER` レコードを `PutItem`（PK=`FamilyID`, SK=`USER#{CognitoSub}`, `DisplayName`, `TotalPoints=0`）。条件 `attribute_not_exists(SK)`。
+    4. Cognito `AdminUpdateUserAttributes` で `custom:family_id` をセット。
+    5. フロントは JWT 強制リフレッシュ（`Auth.currentSession({ forceRefresh: true })`）して新しいクレームを取り込む。
+
+### 2.8. 招待トークン発行API
+
+既存ユーザーが家族メンバーを招待するためのトークンを発行します。
+
+* **エンドポイント**: `POST /families/invites`
+* **目的**: 共有可能な招待リンク（QR / URL）を生成。
+* **JWT 要件**: 必須。`custom:family_id` クレームが **必要**。
+* **リクエストボディ**: なし
+* **レスポンス**: `{ "token": "...", "url": "https://iezi.app/invite?token=...", "expiresAt": 1737000000 }`
+* **DynamoDB操作**: `PutItem`（**別テーブル** `FamilyInviteTable`）
+    * PK: `Token`（UUIDv4 を生成）
+    * 属性: `FamilyID`, `ExpiresAt`（現在時刻 + 24時間のUNIX秒）
+    * TTL: `ExpiresAt` を TTL 属性として有効化（自然消滅）
+
+### 2.9. 招待で家族に参加API ⚠️冪等性必須
+
+招待リンク経由でサインアップした新規ユーザーが家族に参加するAPIです。
+
+* **エンドポイント**: `POST /families/join`
+* **目的**: 招待トークンを消費して新規ユーザーを既存家族に登録する。
+* **JWT 要件**: 必須。ただし `custom:family_id` クレームは **存在しないこと**。
+* **リクエストボディ**: `{ "token": "550e8400-...", "displayName": "ママ" }`
+* **レスポンス**: `{ "familyId": "fam_xxx" }`
+* **エラー**:
+    * 招待が見つからない or 期限切れ → 410 Gone
+    * 既に別ユーザーが消費済み → 409 Conflict
+    * 既に同ユーザーが消費済み → **冪等処理として続行**（リトライ許容）
+    * 呼び出しユーザーが既に家族所属 → 409 Conflict
+* **DynamoDB操作**: `TransactWriteItems`（**2テーブル横断**）
+    * **処理A（招待を消費）**: `FamilyInviteTable`
+        * `UpdateItem` で `UsedAt`, `UsedBy` をセット
+        * 条件: `attribute_not_exists(UsedAt) OR UsedBy = :sub`（冪等リトライを許容しつつ別ユーザーの消費は拒否）
+    * **処理B（ユーザー登録）**: `FamilyAppTable`
+        * `PutItem` で PK=`FamilyID`, SK=`USER#{CognitoSub}`, `DisplayName`, `TotalPoints=0`
+        * 条件: `attribute_not_exists(SK)`
+* **トランザクション後処理**:
+    * Cognito `AdminUpdateUserAttributes` で `custom:family_id` を更新
+    * Cognito 更新が失敗した場合、クライアントは同じトークンで再試行可能（条件式が冪等性を担保）
+    * フロントは JWT 強制リフレッシュして新クレームを取り込む
+
+### 2.10. 実績の取り消し（削除）API ⚠️要注意
 
 間違えて「完了」を押してしまった場合など、実績を削除するAPIです。単に履歴を消すだけでなく、加算されたポイントも同時にマイナス（減算）する必要があるため、トランザクション処理が必須になります。
 
