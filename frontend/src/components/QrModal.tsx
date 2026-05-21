@@ -1,12 +1,38 @@
-import { X, QrCode } from 'lucide-react';
-import { flatBorder, bounceClass } from '../styles';
+import { useEffect, useState } from 'react'
+import { X, QrCode, Loader2, Copy, Check } from 'lucide-react'
+import { flatBorder, bounceClass } from '../styles'
+import { apiPost } from '../lib/api'
 
-interface QrModalProps {
-  onClose: () => void;
-  onPreviewInvite: () => void;
+interface InviteResponse {
+  token: string
+  url: string
+  expiresAt: number
 }
 
-export default function QrModal({ onClose, onPreviewInvite }: QrModalProps) {
+interface QrModalProps {
+  onClose: () => void
+}
+
+export default function QrModal({ onClose }: QrModalProps) {
+  const [invite, setInvite] = useState<InviteResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    apiPost<InviteResponse>('/families/invites')
+      .then(setInvite)
+      .catch(err => setError((err as Error).message ?? '招待リンクの生成に失敗しました'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function handleCopy() {
+    if (!invite?.url) return
+    await navigator.clipboard.writeText(invite.url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
     <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className={`bg-white w-full max-w-sm rounded-3xl p-6 ${flatBorder} shadow-[8px_8px_0px_#292524] relative animate-in zoom-in-95 duration-200`}>
@@ -16,32 +42,37 @@ export default function QrModal({ onClose, onPreviewInvite }: QrModalProps) {
 
         <h3 className="text-xl font-black mb-6 text-center">家族を招待</h3>
 
-        <div className={`w-48 h-48 mx-auto bg-stone-100 rounded-2xl ${flatBorder} flex items-center justify-center mb-6 relative`}>
-          <QrCode className="w-24 h-24 text-stone-300" />
-          <div className="absolute font-bold text-stone-400 rotate-12">QR Code Mock</div>
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-10 h-10 animate-spin text-teal-400" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500 font-bold">{error}</div>
+        ) : (
+          <>
+            <div className={`w-48 h-48 mx-auto bg-stone-100 rounded-2xl ${flatBorder} flex items-center justify-center mb-6`}>
+              <QrCode className="w-24 h-24 text-stone-300" />
+            </div>
 
-        <div className="flex gap-2 mb-6">
-          <input
-            type="text"
-            readOnly
-            value="https://iezi.app/invite?token=abc..."
-            className={`flex-1 p-3 rounded-xl bg-stone-50 ${flatBorder} font-bold text-sm text-stone-500`}
-          />
-          <button className={`bg-stone-800 text-white px-4 rounded-xl font-bold border-2 border-stone-800 ${bounceClass}`}>
-            コピー
-          </button>
-        </div>
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                readOnly
+                value={invite?.url ?? ''}
+                className={`flex-1 p-3 rounded-xl bg-stone-50 ${flatBorder} font-bold text-sm text-stone-500 min-w-0`}
+              />
+              <button
+                onClick={handleCopy}
+                className={`bg-stone-800 text-white px-4 rounded-xl font-bold border-2 border-stone-800 ${bounceClass} flex items-center gap-1 shrink-0`}
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
 
-        <div className="border-t-2 border-dashed border-stone-200 pt-4 text-center">
-          <button
-            onClick={onPreviewInvite}
-            className="text-xs font-bold text-teal-600 bg-teal-50 px-4 py-2 rounded-full border border-teal-200"
-          >
-            ※招待された側の画面プレビューを見る
-          </button>
-        </div>
+            <p className="text-xs font-bold text-stone-400 text-center">有効期限: 24時間</p>
+          </>
+        )}
       </div>
     </div>
-  );
+  )
 }

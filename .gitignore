@@ -6,3 +6,8 @@ build
 infra/.terraform/
 *.tfvars
 !*.tfvars.example
+
+# 環境変数（実際の値を含むファイル）
+.env
+.env.local
+.env.*.local

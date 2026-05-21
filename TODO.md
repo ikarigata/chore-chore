@@ -57,11 +57,11 @@
 - [x] Lambda 実行ロールに `FamilyInviteTable` への読み書き権限を追加
 
 #### フロントエンド (`frontend/`)
-- [ ] `/invite?token=xxx` で来た場合、localStorage にトークンを保存
-- [ ] サインアップ後の遷移先で JWT の `custom:family_id` 有無で分岐
+- [x] `/invite?token=xxx` で来た場合、localStorage にトークンを保存
+- [x] サインアップ後の遷移先で JWT の `custom:family_id` 有無で分岐
   - 有り → ホーム
   - 無し + localStorage にトークン → DisplayName 入力 → `POST /families/join`
   - 無し + localStorage 空 → 「家族を作る」画面 → DisplayName 入力 → `POST /families`
-- [ ] `POST /families/{...}` 成功後に `Auth.currentSession({ forceRefresh: true })`
-- [ ] 設定画面の「家族を招待」で `POST /families/invites` を呼んで QR / URL 表示
-- [ ] オーファン状態（Cognito 登録済みだが `family_id` 未セット）の自動復旧フロー
+- [x] `POST /families/{...}` 成功後に `Auth.currentSession({ forceRefresh: true })`
+- [x] 設定画面の「家族を招待」で `POST /families/invites` を呼んで QR / URL 表示
+- [x] オーファン状態（Cognito 登録済みだが `family_id` 未セット）の自動復旧フロー

@@ -1,20 +1,20 @@
-import { useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, ScrollText, Settings, Sparkles, UserPlus } from 'lucide-react';
-import NavButton from './NavButton';
-import QrModal from './QrModal';
+import { useState } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Home, ScrollText, Settings, Sparkles, UserPlus } from 'lucide-react'
+import NavButton from './NavButton'
+import QrModal from './QrModal'
 
 export interface LayoutOutletContext {
-  onOpenQr: () => void;
+  onOpenQr: () => void
 }
 
 export default function Layout() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [showQrModal, setShowQrModal] = useState(false);
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [showQrModal, setShowQrModal] = useState(false)
 
-  const path = location.pathname;
-  const activeTab = path === '/history' ? 'history' : path === '/settings' ? 'settings' : 'home';
+  const path = location.pathname
+  const activeTab = path === '/history' ? 'history' : path === '/settings' ? 'settings' : 'home'
 
   return (
     <div className="min-h-screen bg-amber-50 text-stone-800 font-sans pb-24">
@@ -38,15 +38,7 @@ export default function Layout() {
         <NavButton icon={Settings} label="設定" active={activeTab === 'settings'} onClick={() => navigate('/settings')} />
       </nav>
 
-      {showQrModal && (
-        <QrModal
-          onClose={() => setShowQrModal(false)}
-          onPreviewInvite={() => {
-            setShowQrModal(false);
-            navigate('/invite');
-          }}
-        />
-      )}
+      {showQrModal && <QrModal onClose={() => setShowQrModal(false)} />}
     </div>
-  );
+  )
 }
