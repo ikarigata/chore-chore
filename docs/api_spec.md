@@ -2,7 +2,7 @@
 
 ## 1. 基本仕様
 
-* **アーキテクチャ**: API Gateway + AWS Lambda (Go言語ファットLambda) + Amazon DynamoDB。
+* **アーキテクチャ**: API Gateway + AWS Lambda (TypeScript ファットLambda) + Amazon DynamoDB。
 * **ルーティング方式**: API Gatewayの `ANY /{proxy+}` により全てのリクエストを単一のLambda関数に集約し、内部の `switch` 文で各処理へ振り分けます。
 * **認証・認可**: 全てのエンドポイントはAmazon API GatewayのCognito Authorizerによって保護されます。
     * フロントエンドからリクエストヘッダー (`Authorization`) に乗せて送られてくるJWTをAPI Gatewayの入り口で自動検証します。
