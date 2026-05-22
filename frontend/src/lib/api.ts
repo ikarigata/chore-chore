@@ -9,10 +9,10 @@ async function getIdToken(): Promise<string> {
   return token
 }
 
-export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+async function request<T>(path: string, method: string, body?: unknown): Promise<T> {
   const token = await getIdToken()
   const res = await fetch(`${API_ENDPOINT}${path}`, {
-    method: 'POST',
+    method,
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
@@ -27,3 +27,8 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   }
   return res.json() as Promise<T>
 }
+
+export const apiGet = <T>(path: string) => request<T>(path, 'GET')
+export const apiPost = <T>(path: string, body?: unknown) => request<T>(path, 'POST', body)
+export const apiPut = <T>(path: string, body?: unknown) => request<T>(path, 'PUT', body)
+export const apiDelete = <T>(path: string, body?: unknown) => request<T>(path, 'DELETE', body)

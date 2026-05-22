@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { QrCode, Plus } from 'lucide-react';
+import { QrCode, Plus, Trash2, Loader2 } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useApp } from '../context';
 import { CATEGORIES } from '../constants';
@@ -7,23 +7,47 @@ import { springStyle, bounceClass, flatBorder } from '../styles';
 import type { LayoutOutletContext } from '../components/Layout';
 
 export default function Settings() {
-  const { tasks, setTasks } = useApp();
+  const { tasks, addTask, deleteTask } = useApp();
   const { onOpenQr } = useOutletContext<LayoutOutletContext>();
 
   const [newTaskName, setNewTaskName] = useState('');
   const [newTaskPoints, setNewTaskPoints] = useState(10);
   const [newTaskCat, setNewTaskCat] = useState('cooking');
   const [filterCat, setFilterCat] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
-  const handleAddTask = (e: React.FormEvent) => {
+  const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskName.trim()) return;
-    setTasks([
-      { id: `task_${Date.now()}`, name: newTaskName, points: Number(newTaskPoints), categoryId: newTaskCat },
-      ...tasks,
-    ]);
-    setNewTaskName('');
-    setNewTaskPoints(10);
+    setError('');
+    setSubmitting(true);
+    try {
+      await addTask({
+        taskId: crypto.randomUUID(),
+        taskName: newTaskName.trim(),
+        points: Number(newTaskPoints),
+        categoryId: newTaskCat,
+      });
+      setNewTaskName('');
+      setNewTaskPoints(10);
+    } catch (err) {
+      setError((err as Error).message ?? '保存に失敗しました');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    setDeletingId(taskId);
+    try {
+      await deleteTask(taskId);
+    } catch (err) {
+      setError((err as Error).message ?? '削除に失敗しました');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -77,12 +101,14 @@ export default function Settings() {
               <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-500">pt</span>
             </div>
           </div>
+          {error && <p className="text-red-500 text-sm font-bold">{error}</p>}
           <button
             type="submit"
-            className={`w-full bg-yellow-300 py-3 rounded-xl font-bold ${flatBorder} ${bounceClass}`}
+            disabled={submitting}
+            className={`w-full bg-yellow-300 py-3 rounded-xl font-bold ${flatBorder} ${bounceClass} flex items-center justify-center gap-2`}
             style={springStyle}
           >
-            家事マスタに追加
+            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : '家事マスタに追加'}
           </button>
         </form>
       </section>
@@ -116,14 +142,25 @@ export default function Settings() {
             .map(task => {
               const cat = CATEGORIES.find(c => c.id === task.categoryId);
               return (
-                <div key={task.id} className={`bg-white p-3 rounded-xl ${flatBorder} flex items-center justify-between opacity-80`}>
+                <div key={task.taskId} className={`bg-white p-3 rounded-xl ${flatBorder} flex items-center justify-between`}>
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full ${cat?.color} ${flatBorder} flex items-center justify-center`}>
+                    <div className={`w-8 h-8 rounded-full ${cat?.color ?? 'bg-stone-100'} ${flatBorder} flex items-center justify-center`}>
                       {cat && <cat.icon className="w-4 h-4" />}
                     </div>
-                    <span className="font-bold text-sm">{task.name}</span>
+                    <span className="font-bold text-sm">{task.taskName}</span>
                   </div>
-                  <span className="font-black text-sm">{task.points}pt</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-sm">{task.points}pt</span>
+                    <button
+                      onClick={() => handleDeleteTask(task.taskId)}
+                      disabled={deletingId === task.taskId}
+                      className={`p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors ${flatBorder}`}
+                    >
+                      {deletingId === task.taskId
+                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                        : <Trash2 className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               );
             })}

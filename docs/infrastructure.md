@@ -34,7 +34,7 @@
 
 - `frontend/`: ReactによるSPAプロジェクト
 - `backend/`: TypeScriptによるLambdaソースコード
-- `infrastructure/`: TerraformによるHCLインフラストラクチャ定義
+- `infra/`: TerraformによるHCLインフラストラクチャ定義
 
 ## 3. インフラコンポーネント仕様
 

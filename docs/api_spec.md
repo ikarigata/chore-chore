@@ -36,7 +36,7 @@
     * **処理A（タスク履歴の作成）**:
         * PK: `FamilyID` を指定します。
         * SK: `HISTORY#{RFC3339Timestamp}#{CognitoSub}#{TaskExecutionID}` を指定します。
-        * 重要な条件: `attribute_not_exists(SK)` を指定し、重複リクエストを確実にブロックします。
+        * 重要な条件: `attribute_not_exists(DataSortKey)` を指定し、重複リクエストを確実にブロックします。
         * TTL: あわせて `ExpiresAt` に完了から1年後のUNIXタイムスタンプをセットします。
     * **処理B（日次サマリの更新）**:
         * PK: `FamilyID` を指定します。

@@ -1,28 +1,31 @@
 import type { LucideIcon } from 'lucide-react';
 
 export interface User {
-  id: string;
-  name: string;
-  color: string;
-  today: number;
-  total: number;
+  cognitoSub: string;
+  displayName: string;
+  totalPoints: number;
+  color: string; // assigned client-side for visual differentiation
 }
 
 export interface Task {
-  id: string;
-  name: string;
-  points: number;
-  categoryId: string;
-}
-
-export interface HistoryItem {
-  id: string;
   taskId: string;
   taskName: string;
   points: number;
-  categoryId: string;
-  userId: string;
-  timestamp: Date;
+  categoryId: string; // frontend-only, not persisted to backend
+}
+
+export interface DailySummary {
+  cognitoSub: string;
+  date: string;
+  dailyPoints: number;
+}
+
+export interface HistoryItem {
+  taskExecutionId: string;
+  cognitoSub: string;
+  taskId: string;
+  points: number;
+  timestamp: string; // ISO 8601
 }
 
 export interface Category {

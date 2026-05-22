@@ -1,19 +1,18 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Check, ArrowLeft, Flame, Loader2 } from 'lucide-react';
 import { useApp } from '../context';
-import { CATEGORIES, GRAPH_BASE } from '../constants';
+import { CATEGORIES } from '../constants';
 import UserScore from '../components/UserScore';
 import { springStyle, bounceClass, flatBorder } from '../styles';
 
 export default function Home() {
-  const { users, tasks, executeTask, loadingTaskId } = useApp();
+  const { members, tasks, executeTask, loadingTaskId, todaySummaries } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const currentGraphData = useMemo(() => {
-    return [...GRAPH_BASE, { day: '今日', papa: users.papa.today, mama: users.mama.today }];
-  }, [users]);
-
-  const maxPoints = Math.max(...currentGraphData.map(d => Math.max(d.papa, d.mama)), 100);
+  const maxPoints = Math.max(
+    ...members.map(m => todaySummaries.find(s => s.cognitoSub === m.cognitoSub)?.dailyPoints ?? 0),
+    100,
+  );
 
   return (
     <div className="p-4 space-y-6">
@@ -21,30 +20,31 @@ export default function Home() {
       <section className={`bg-white rounded-2xl p-4 ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
         <div className="flex justify-between items-end mb-4">
           <div className="flex gap-4">
-            <UserScore user={users.papa} />
-            <UserScore user={users.mama} />
+            {members.map(m => {
+              const daily = todaySummaries.find(s => s.cognitoSub === m.cognitoSub)?.dailyPoints ?? 0;
+              return <UserScore key={m.cognitoSub} user={m} dailyPoints={daily} />;
+            })}
           </div>
         </div>
 
-        <div className="h-24 relative flex items-end justify-between pt-4 border-t-2 border-stone-100">
+        <div className="h-24 relative flex items-end justify-around pt-4 border-t-2 border-stone-100">
           <div className="absolute top-0 w-full border-b border-dashed border-stone-200"></div>
           <div className="absolute top-1/2 w-full border-b border-dashed border-stone-200"></div>
 
-          {currentGraphData.map((data, i) => (
-            <div key={i} className="flex flex-col items-center gap-1 flex-1 z-10">
-              <div className="flex gap-1 h-16 items-end">
-                <div
-                  className="w-2 bg-yellow-300 rounded-t-sm border-x border-t border-stone-800 transition-all duration-500 ease-out"
-                  style={{ height: `${(data.papa / maxPoints) * 100}%`, ...springStyle }}
-                />
-                <div
-                  className="w-2 bg-orange-300 rounded-t-sm border-x border-t border-stone-800 transition-all duration-500 ease-out"
-                  style={{ height: `${(data.mama / maxPoints) * 100}%`, ...springStyle }}
-                />
+          {members.map(m => {
+            const daily = todaySummaries.find(s => s.cognitoSub === m.cognitoSub)?.dailyPoints ?? 0;
+            return (
+              <div key={m.cognitoSub} className="flex flex-col items-center gap-1 flex-1 z-10">
+                <div className="flex gap-1 h-16 items-end">
+                  <div
+                    className={`w-4 ${m.color} rounded-t-sm border-x border-t border-stone-800 transition-all duration-500 ease-out`}
+                    style={{ height: `${(daily / maxPoints) * 100}%`, ...springStyle }}
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-stone-500">{m.displayName}</span>
               </div>
-              <span className="text-[10px] font-bold text-stone-500">{data.day}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -88,9 +88,9 @@ export default function Home() {
             </div>
 
             {tasks.filter(t => t.categoryId === selectedCategory).map(task => (
-              <div key={task.id} className={`bg-white p-3 rounded-2xl ${flatBorder} flex items-center justify-between shadow-[2px_2px_0px_#292524]`}>
+              <div key={task.taskId} className={`bg-white p-3 rounded-2xl ${flatBorder} flex items-center justify-between shadow-[2px_2px_0px_#292524]`}>
                 <div>
-                  <div className="font-bold">{task.name}</div>
+                  <div className="font-bold">{task.taskName}</div>
                   <div className="text-sm font-black text-yellow-600 flex items-center gap-1">
                     <Flame className="w-4 h-4" /> {task.points} pt
                   </div>
@@ -98,10 +98,10 @@ export default function Home() {
                 <button
                   onClick={() => executeTask(task)}
                   disabled={loadingTaskId !== null}
-                  className={`bg-teal-200 px-4 py-2 rounded-full font-bold ${flatBorder} flex items-center gap-1 transition-all ${loadingTaskId === task.id ? 'opacity-80 scale-95' : bounceClass}`}
+                  className={`bg-teal-200 px-4 py-2 rounded-full font-bold ${flatBorder} flex items-center gap-1 transition-all ${loadingTaskId === task.taskId ? 'opacity-80 scale-95' : bounceClass}`}
                   style={springStyle}
                 >
-                  {loadingTaskId === task.id ? (
+                  {loadingTaskId === task.taskId ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <>

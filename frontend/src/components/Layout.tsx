@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Home, ScrollText, Settings, Sparkles, UserPlus } from 'lucide-react'
+import { Home, ScrollText, Settings, Sparkles } from 'lucide-react'
 import NavButton from './NavButton'
 import QrModal from './QrModal'
+import { useApp } from '../context'
+import { flatBorder } from '../styles'
 
 export interface LayoutOutletContext {
   onOpenQr: () => void
@@ -12,9 +14,19 @@ export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const [showQrModal, setShowQrModal] = useState(false)
+  const { members, mySub, initialized } = useApp()
 
   const path = location.pathname
   const activeTab = path === '/history' ? 'history' : path === '/settings' ? 'settings' : 'home'
+  const myName = members.find(m => m.cognitoSub === mySub)?.displayName ?? ''
+
+  if (!initialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-amber-50">
+        <div className="w-8 h-8 border-4 border-teal-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-amber-50 text-stone-800 font-sans pb-24">
@@ -23,9 +35,11 @@ export default function Layout() {
           <Sparkles className="w-5 h-5 text-yellow-500" />
           iezi
         </h1>
-        <div className="bg-yellow-200 px-3 py-1 rounded-full font-bold text-sm border-2 border-stone-800 flex items-center gap-1">
-          <UserPlus className="w-4 h-4" /> パパ
-        </div>
+        {myName && (
+          <div className={`bg-yellow-200 px-3 py-1 rounded-full font-bold text-sm ${flatBorder}`}>
+            {myName}
+          </div>
+        )}
       </header>
 
       <main className="max-w-md mx-auto w-full">

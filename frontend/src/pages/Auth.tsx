@@ -20,7 +20,7 @@ export default function Auth() {
   const [error, setError] = useState('')
 
   function afterAuth() {
-    navigate('/onboarding')
+    navigate('/')
   }
 
   async function handleSignIn(e: React.FormEvent) {
