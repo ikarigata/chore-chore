@@ -21,7 +21,7 @@ output "cloudfront_distribution_id" {
 # ============================================================
 output "api_endpoint" {
   description = "API Gateway エンドポイント URL"
-  value       = aws_apigatewayv2_stage.default.invoke_url
+  value       = trimsuffix(aws_apigatewayv2_stage.default.invoke_url, "/")
 }
 
 output "lambda_function_name" {

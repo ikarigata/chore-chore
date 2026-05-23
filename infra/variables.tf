@@ -1,10 +1,10 @@
 variable "env" {
-  description = "デプロイ環境名 (staging | prod)"
+  description = "デプロイ環境名 (dev | staging | prod)"
   type        = string
 
   validation {
-    condition     = contains(["staging", "prod"], var.env)
-    error_message = "env は 'staging' または 'prod' を指定してください。"
+    condition     = contains(["dev", "staging", "prod"], var.env)
+    error_message = "env は 'dev'、'staging'、または 'prod' を指定してください。"
   }
 }
 
