@@ -13,6 +13,7 @@ export interface TaskMaster {
   taskId: TaskID
   taskName: string
   points: number
+  categoryId?: string
 }
 
 export interface DailySummary {

@@ -1,10 +1,26 @@
-import { ScrollText } from 'lucide-react';
+import { useState } from 'react';
+import { ScrollText, Undo2, Loader2 } from 'lucide-react';
 import { useApp } from '../context';
 import { CATEGORIES } from '../constants';
 import { flatBorder } from '../styles';
+import type { HistoryItem } from '../types';
 
 export default function History() {
-  const { history, members, tasks, mySub } = useApp();
+  const { history, members, tasks, mySub, cancelTask } = useApp();
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState('');
+
+  const handleCancel = async (item: HistoryItem) => {
+    setCancelingId(item.taskExecutionId);
+    setCancelError('');
+    try {
+      await cancelTask(item);
+    } catch (err) {
+      setCancelError((err as Error).message ?? '取り消しに失敗しました');
+    } finally {
+      setCancelingId(null);
+    }
+  };
 
   return (
     <div className="p-4 space-y-4">
@@ -12,6 +28,12 @@ export default function History() {
         <ScrollText className="w-5 h-5 text-orange-500" />
         みんなの履歴
       </h2>
+
+      {cancelError && (
+        <p className="text-sm font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+          {cancelError}
+        </p>
+      )}
 
       {history.length === 0 ? (
         <div className="text-center py-12 text-stone-500 font-bold bg-white rounded-2xl border-2 border-dashed border-stone-300">
@@ -25,6 +47,7 @@ export default function History() {
             const member = members.find(m => m.cognitoSub === item.cognitoSub);
             const isMe = item.cognitoSub === mySub;
             const ts = new Date(item.timestamp);
+            const isCanceling = cancelingId === item.taskExecutionId;
             return (
               <div key={item.taskExecutionId} className="relative flex items-center justify-between group animate-in fade-in slide-in-from-bottom-4 duration-300">
                 <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 border-white ${member?.color ?? 'bg-stone-300'} shadow shrink-0 z-10`}>
@@ -40,9 +63,23 @@ export default function History() {
                   </div>
                   <div className="text-[10px] font-bold text-stone-400 flex items-center justify-between">
                     <span>{isMe ? 'あなた' : (member?.displayName ?? '不明')} が完了</span>
-                    <span>
-                      {ts.getHours()}:{ts.getMinutes().toString().padStart(2, '0')}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {ts.getHours()}:{ts.getMinutes().toString().padStart(2, '0')}
+                      </span>
+                      {isMe && (
+                        <button
+                          onClick={() => handleCancel(item)}
+                          disabled={cancelingId !== null}
+                          title="取り消す"
+                          className={`p-1 rounded-lg text-stone-300 hover:text-red-400 hover:bg-red-50 transition-colors disabled:opacity-40 ${flatBorder}`}
+                        >
+                          {isCanceling
+                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                            : <Undo2 className="w-3 h-3" />}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

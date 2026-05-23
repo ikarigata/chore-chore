@@ -11,7 +11,7 @@ export interface Task {
   taskId: string;
   taskName: string;
   points: number;
-  categoryId: string; // frontend-only, not persisted to backend
+  categoryId: string; // バックエンドの Category 属性に永続化される。未設定の旧データはフロントで 'other' 相当として扱う
 }
 
 export interface DailySummary {

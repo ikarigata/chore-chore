@@ -43,11 +43,13 @@ function parseUser(item: DynamoItem): User {
 
 function parseTaskMaster(item: DynamoItem): TaskMaster {
   const sk = item['DataSortKey'] as string
-  return {
+  const master: TaskMaster = {
     taskId: sk.slice('TASK#'.length),
     taskName: item['TaskName'] as string,
     points: item['Points'] as number,
   }
+  if (item['Category'] !== undefined) master.categoryId = item['Category'] as string
+  return master
 }
 
 function parseDailySummary(item: DynamoItem): DailySummary {
@@ -249,17 +251,14 @@ export class DynamoFamilyRepository implements IFamilyRepository {
   }
 
   async upsertTaskMaster(familyId: FamilyID, input: UpsertTaskInput): Promise<void> {
-    await this.client.send(
-      new PutCommand({
-        TableName: TABLE_NAME,
-        Item: {
-          FamilyID: familyId,
-          DataSortKey: `TASK#${input.taskId}`,
-          TaskName: input.taskName,
-          Points: input.points,
-        },
-      }),
-    )
+    const item: Record<string, unknown> = {
+      FamilyID: familyId,
+      DataSortKey: `TASK#${input.taskId}`,
+      TaskName: input.taskName,
+      Points: input.points,
+    }
+    if (input.categoryId !== undefined) item['Category'] = input.categoryId
+    await this.client.send(new PutCommand({ TableName: TABLE_NAME, Item: item }))
   }
 
   async deleteTaskMaster(familyId: FamilyID, taskId: TaskID): Promise<void> {

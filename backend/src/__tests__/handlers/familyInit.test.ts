@@ -31,4 +31,22 @@ describe('familyInitHandler', () => {
     expect(res.statusCode).toBe(200)
     expect(res.body).toEqual({ users: [], tasks: [] })
   })
+
+  it('家事に categoryId がある場合、レスポンスにそのまま含まれる', async () => {
+    repo.taskMasters = [{ taskId: 'task-1', taskName: 'お風呂掃除', points: 10, categoryId: 'water' }]
+
+    const res = await familyInitHandler(CTX, REQ, { familyRepo: repo })
+
+    const body = res.body as { tasks: { categoryId?: string }[] }
+    expect(body.tasks[0]?.categoryId).toBe('water')
+  })
+
+  it('家事に categoryId がない場合（旧データ）、tasks 要素に categoryId プロパティが含まれない', async () => {
+    repo.taskMasters = [{ taskId: 'task-1', taskName: 'お風呂掃除', points: 10 }]
+
+    const res = await familyInitHandler(CTX, REQ, { familyRepo: repo })
+
+    const body = res.body as { tasks: object[] }
+    expect(body.tasks[0]).not.toHaveProperty('categoryId')
+  })
 })

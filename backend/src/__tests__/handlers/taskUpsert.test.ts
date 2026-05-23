@@ -51,4 +51,23 @@ describe('taskUpsertHandler', () => {
       ),
     ).rejects.toThrow(new AppError(400, 'points は0以上である必要があります'))
   })
+
+  it('categoryId を指定した場合、リポジトリに渡される', async () => {
+    const body = { taskId: 'task-1', taskName: 'ゴミ出し', points: 5, categoryId: 'cooking' }
+    await taskUpsertHandler(CTX, makeReq(body), { familyRepo: repo })
+
+    const [, input] = repo.upsertTaskMasterCalls[0]!
+    expect(input.categoryId).toBe('cooking')
+  })
+
+  it('categoryId を省略した場合、リポジトリに categoryId が渡されない', async () => {
+    await taskUpsertHandler(
+      CTX,
+      makeReq({ taskId: 'task-1', taskName: 'ゴミ出し', points: 5 }),
+      { familyRepo: repo },
+    )
+
+    const [, input] = repo.upsertTaskMasterCalls[0]!
+    expect(input.categoryId).toBeUndefined()
+  })
 })

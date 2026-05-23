@@ -7,7 +7,7 @@ const MEMBER_COLORS = ['bg-yellow-300', 'bg-orange-300', 'bg-teal-300', 'bg-purp
 
 interface InitResponse {
   users: Omit<User, 'color'>[];
-  tasks: { taskId: string; taskName: string; points: number }[];
+  tasks: { taskId: string; taskName: string; points: number; categoryId?: string }[];
 }
 
 interface SummaryResponse {
@@ -28,6 +28,7 @@ interface AppContextType {
   addTask: (task: Task) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   executeTask: (task: Task) => Promise<void>;
+  cancelTask: (item: HistoryItem) => Promise<void>;
   loadingTaskId: string | null;
   initialized: boolean;
 }
@@ -58,8 +59,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setMembers(
         initData.users.map((u, i) => ({ ...u, color: MEMBER_COLORS[i % MEMBER_COLORS.length] }))
       );
-      // categoryId はバックエンドに存在しないため、初期値として 'other' を設定
-      setTasks(initData.tasks.map(t => ({ ...t, categoryId: 'other' })));
+      setTasks(initData.tasks.map(t => ({ ...t, categoryId: t.categoryId ?? 'other' })));
       setTodaySummaries(summaryData.summaries);
       setHistory(historiesData.histories);
       setInitialized(true);
@@ -68,7 +68,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addTask = async (task: Task) => {
-    await apiPut('/tasks', { taskId: task.taskId, taskName: task.taskName, points: task.points });
+    await apiPut('/tasks', { taskId: task.taskId, taskName: task.taskName, points: task.points, categoryId: task.categoryId });
     setTasks(prev => [task, ...prev.filter(t => t.taskId !== task.taskId)]);
   };
 
@@ -94,8 +94,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const cancelTask = async (item: HistoryItem) => {
+    await apiDelete('/tasks/execute', {
+      taskExecutionId: item.taskExecutionId,
+      timestamp: item.timestamp,
+      points: item.points,
+    });
+    const [summaryData, historiesData] = await Promise.all([
+      apiGet<SummaryResponse>('/summary/daily'),
+      apiGet<HistoriesResponse>('/histories'),
+    ]);
+    setTodaySummaries(summaryData.summaries);
+    setHistory(historiesData.histories);
+  };
+
   return (
-    <AppContext.Provider value={{ mySub, members, tasks, history, todaySummaries, addTask, deleteTask, executeTask, loadingTaskId, initialized }}>
+    <AppContext.Provider value={{ mySub, members, tasks, history, todaySummaries, addTask, deleteTask, executeTask, cancelTask, loadingTaskId, initialized }}>
       {children}
     </AppContext.Provider>
   );

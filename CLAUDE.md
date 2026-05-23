@@ -4,7 +4,25 @@
 
 ## プロジェクト概要
 
-**iezi** は、家族間で家事タスクを共有・記録し、獲得ポイントを管理するアプリです。AWS のマネージドサービスのみで構成された完全サーバーレスアーキテクチャを採用しており、2名利用の場合は AWS 無料枠内でほぼ0円での運用を目指します。
+**iezi** は、家族間で **家事** と **家事実績** を共有・記録し、獲得ポイントを管理するアプリです。AWS のマネージドサービスのみで構成された完全サーバーレスアーキテクチャを採用しており、2名利用の場合は AWS 無料枠内でほぼ0円での運用を目指します。
+
+## ドメイン用語（重要 — 用語を曖昧に使わないこと）
+
+ドキュメント・コミット・PR・口頭コミュニケーションでは以下の日本語に統一する。「タスク」という曖昧な語は **使わない**。
+
+| 日本語 | 意味 | コード上の名称（英語） | DynamoDB SK / 属性 | API フィールド |
+|---|---|---|---|---|
+| **家事** | 家事マスター。家族で定義する「家事の種類・名前・獲得ポイント・カテゴリ」の定義データ。例:「お風呂掃除 10pt」 | `TaskMaster`（backend） / `Task`（frontend） | SK: `TASK#{TaskID}` | `taskId`, `taskName`, `points`, `categoryId` |
+| **家事実績** | 家事を実際に実行したという履歴ログ。誰がいつどの家事をして何ポイント獲得したか。 | `TaskHistory` | SK: `HISTORY#{RFC3339Timestamp}#{CognitoSub}#{TaskExecutionID}` | `taskExecutionId`, `taskId`, `points`, `timestamp` |
+| **家事カテゴリ** | 「料理」「掃除」「洗濯」など、家事を分類するためのタグ。家事の属性。 | `categoryId` | `TASK#` レコードの `Category` 属性 | `categoryId` |
+| **日次サマリ** | 「今日誰が何ポイント稼いだか」を即座に表示するためのホットデータ。 | `DailySummary` | SK: `DAILY#{YYYY-MM-DD}#{CognitoSub}` | `date`, `cognitoSub`, `dailyPoints` |
+
+- 「家事を完了する」=「家事実績を作成する」（= `POST /tasks/execute`）
+- 「家事実績を取り消す」=「誤って記録した家事実績を削除し、加算ポイントを減算する」（= `DELETE /tasks/execute`）
+- コード上の `TaskID` は **家事** の ID（家事マスターを一意に識別）。`TaskExecutionID` は **家事実績** の ID（個々の実行を一意に識別）。
+- API パスやコード識別子で `task` / `Task` が出てきた場合、文脈で「家事」を指すか「家事実績」を指すかを判別する：
+  - `PUT /tasks`, `DELETE /tasks/{taskId}` → **家事**（マスター）の操作
+  - `POST /tasks/execute`, `DELETE /tasks/execute` → **家事実績** の操作
 
 ## 技術スタック（変更禁止）
 
@@ -59,9 +77,9 @@ terraform apply -var-file=<env>.tfvars
 | エンティティ | PK | SK |
 |---|---|---|
 | ユーザー情報・累積ポイント | `FamilyID` | `USER#{CognitoSub}` |
-| 家事マスター設定 | `FamilyID` | `TASK#{TaskID}` |
+| 家事（家事マスター） | `FamilyID` | `TASK#{TaskID}` |
 | 日次サマリ | `FamilyID` | `DAILY#{YYYY-MM-DD}#{CognitoSub}` |
-| タスク履歴 | `FamilyID` | `HISTORY#{RFC3339Timestamp}#{CognitoSub}#{TaskExecutionID}` |
+| 家事実績 | `FamilyID` | `HISTORY#{RFC3339Timestamp}#{CognitoSub}#{TaskExecutionID}` |
 
 - GSI/LSI は使用しない — 全アクセスパターンは SK の `begins_with` で対応。
 - `DAILY` SK の日付文字列は **必ず** `Asia/Tokyo` タイムゾーンで生成する。
@@ -75,9 +93,9 @@ terraform apply -var-file=<env>.tfvars
 2. `DAILY` サマリ — `UpdateItem` で `ADD DailyPoints :points`
 3. `USER` レコード — `UpdateItem` で `ADD TotalPoints :points`
 
-`TaskExecutionID` はユーザーが完了ボタンをタップした瞬間にフロントエンドで発行する UUID。リトライ時も再発行せず同じ UUID を使い回すことで、`attribute_not_exists` 条件が重複書き込みを防ぐ。
+`TaskExecutionID`（= 家事実績ID）はユーザーが完了ボタンをタップした瞬間にフロントエンドで発行する UUID。リトライ時も再発行せず同じ UUID を使い回すことで、`attribute_not_exists` 条件が重複書き込みを防ぐ。
 
-実績の取り消しは「削除してから再登録」の2ステップで行う（`HISTORY` レコードの直接編集は禁止）。
+家事実績の更新は「削除してから再登録」の2ステップで行う（`HISTORY` レコードの直接編集は禁止）。
 
 ## API ルーティング
 
