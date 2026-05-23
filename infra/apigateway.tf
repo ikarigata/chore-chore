@@ -58,6 +58,14 @@ resource "aws_apigatewayv2_route" "proxy" {
   authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
 }
 
+# プリフライト (OPTIONS) リクエストは認証なしで通過させる（CORS対応）
+resource "aws_apigatewayv2_route" "options_proxy" {
+  api_id             = aws_apigatewayv2_api.main.id
+  route_key          = "OPTIONS /{proxy+}"
+  target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  authorization_type = "NONE"
+}
+
 # ============================================================
 # ステージ（自動デプロイ）
 # ============================================================

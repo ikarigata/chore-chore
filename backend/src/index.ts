@@ -19,6 +19,10 @@ export const handler = async (event: APIGatewayProxyEventV2WithJWTAuthorizer): P
   const method = event.requestContext.http.method
   const path = event.requestContext.http.path
 
+  if (method === "OPTIONS") {
+    return jsonResponse(200, {})
+  }
+
   // リクエストボディのパース（GET 等で body が無い場合も考慮）
   let bodyObj: Record<string, unknown> = {}
   if (event.body) {
