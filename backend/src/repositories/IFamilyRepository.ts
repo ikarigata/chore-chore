@@ -38,6 +38,7 @@ export interface IFamilyRepository {
   listTaskMasters(familyId: FamilyID): Promise<TaskMaster[]>
   getTaskMaster(familyId: FamilyID, taskId: TaskID): Promise<TaskMaster | null>
   getDailySummaries(familyId: FamilyID, date: string): Promise<DailySummary[]>
+  getWeeklySummaries(familyId: FamilyID, from: string, to: string): Promise<DailySummary[]>
   listTaskHistories(familyId: FamilyID): Promise<TaskHistory[]>
   createTaskHistory(familyId: FamilyID, cognitoSub: CognitoSub, input: CreateTaskHistoryInput): Promise<void>
   deleteTaskHistory(familyId: FamilyID, cognitoSub: CognitoSub, input: DeleteTaskHistoryInput): Promise<void>

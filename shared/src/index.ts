@@ -47,6 +47,12 @@ export const SummaryDailyResponseSchema = z.object({
   summaries: z.array(DailySummarySchema),
 });
 
+export const SummaryWeeklyResponseSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  summaries: z.array(DailySummarySchema),
+});
+
 export const TaskHistoryListResponseSchema = z.object({
   taskHistories: z.array(TaskHistorySchema),
 });
@@ -94,6 +100,7 @@ export const FamilyJoinResponseSchema = z.object({
 
 export type FamilyInitResponse = z.infer<typeof FamilyInitResponseSchema>;
 export type SummaryDailyResponse = z.infer<typeof SummaryDailyResponseSchema>;
+export type SummaryWeeklyResponse = z.infer<typeof SummaryWeeklyResponseSchema>;
 export type TaskHistoryListResponse = z.infer<typeof TaskHistoryListResponseSchema>;
 export type TaskMasterUpsertRequest = z.infer<typeof TaskMasterUpsertRequestSchema>;
 export type TaskHistoryCreateRequest = z.infer<typeof TaskHistoryCreateRequestSchema>;

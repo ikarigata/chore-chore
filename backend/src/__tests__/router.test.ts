@@ -29,6 +29,12 @@ describe('route', () => {
     expect(res.statusCode).toBe(200)
   })
 
+  it('GET /summary/weekly → 200', async () => {
+    const res = await route('GET', '/summary/weekly', CTX, makeReq(), deps)
+    expect(res.statusCode).toBe(200)
+    expect(res.body).toMatchObject({ from: expect.any(String), to: expect.any(String) })
+  })
+
   it('GET /histories → 200', async () => {
     const res = await route('GET', '/histories', CTX, makeReq(), deps)
     expect(res.statusCode).toBe(200)

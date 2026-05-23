@@ -18,6 +18,9 @@ const server = setupServer(
   http.get('*/summary/daily', () => {
     return HttpResponse.json({ date: '2026-05-23', summaries: [] });
   }),
+  http.get('*/summary/weekly', () => {
+    return HttpResponse.json({ from: '2026-05-17', to: '2026-05-23', summaries: [] });
+  }),
   http.get('*/histories', () => {
     return HttpResponse.json({
       taskHistories: [

@@ -5,6 +5,7 @@ import { familyInviteHandler } from './handlers/familyInvite.js'
 import { familyJoinHandler } from './handlers/familyJoin.js'
 import { historiesHandler } from './handlers/histories.js'
 import { summaryDailyHandler } from './handlers/summaryDaily.js'
+import { summaryWeeklyHandler } from './handlers/summaryWeekly.js'
 import { taskDeleteHandler } from './handlers/taskDelete.js'
 import { taskExecuteHandler } from './handlers/taskExecute.js'
 import { taskExecuteCancelHandler } from './handlers/taskExecuteCancel.js'
@@ -41,6 +42,7 @@ export async function route(
 
     case 'GET /summary':
       if (seg1 === 'daily') return summaryDailyHandler(ctx, req, deps)
+      if (seg1 === 'weekly') return summaryWeeklyHandler(ctx, req, deps)
       break
 
     case 'GET /histories':

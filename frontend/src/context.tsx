@@ -3,9 +3,11 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 import {
   FamilyInitResponseSchema,
   SummaryDailyResponseSchema,
+  SummaryWeeklyResponseSchema,
   TaskHistoryListResponseSchema,
   type FamilyInitResponse,
   type SummaryDailyResponse,
+  type SummaryWeeklyResponse,
   type TaskHistoryListResponse,
 } from '@iezi/shared';
 import type { User, TaskMaster, TaskHistory, DailySummary } from './types';
@@ -36,6 +38,7 @@ interface AppContextType {
   taskMasters: TaskMaster[];
   taskHistories: TaskHistory[];
   todaySummaries: DailySummary[];
+  weeklySummaries: DailySummary[];
   upsertTaskMaster: (task: TaskMaster) => Promise<void>;
   deleteTaskMaster: (taskId: string) => Promise<void>;
   createTaskHistory: (task: TaskMaster) => Promise<void>;
@@ -53,6 +56,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [taskMasters, setTaskMasters] = useState<TaskMaster[]>([]);
   const [taskHistories, setTaskHistories] = useState<TaskHistory[]>([]);
   const [todaySummaries, setTodaySummaries] = useState<DailySummary[]>([]);
+  const [weeklySummaries, setWeeklySummaries] = useState<DailySummary[]>([]);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
@@ -60,15 +64,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const refreshAllData = useCallback(async () => {
     const token = ++refreshTokenRef.current;
-    const [initData, summaryData, historiesData] = await Promise.all([
+    const [initData, summaryData, weeklyData, historiesData] = await Promise.all([
       apiGet<FamilyInitResponse>('/family/init', FamilyInitResponseSchema),
       apiGet<SummaryDailyResponse>('/summary/daily', SummaryDailyResponseSchema),
+      apiGet<SummaryWeeklyResponse>('/summary/weekly', SummaryWeeklyResponseSchema),
       apiGet<TaskHistoryListResponse>('/histories', TaskHistoryListResponseSchema),
     ]);
     if (token !== refreshTokenRef.current) return;
     setMembers(prev => assignMemberColors(initData.users, prev));
     setTaskMasters(initData.taskMasters.map(t => ({ ...t, categoryId: t.categoryId ?? 'other' })));
     setTodaySummaries(summaryData.summaries);
+    setWeeklySummaries(weeklyData.summaries);
     setTaskHistories(historiesData.taskHistories);
   }, []);
 
@@ -151,6 +157,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       taskMasters,
       taskHistories,
       todaySummaries,
+      weeklySummaries,
       upsertTaskMaster,
       deleteTaskMaster,
       createTaskHistory,

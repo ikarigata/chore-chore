@@ -25,6 +25,15 @@ const server = setupServer(
       ],
     });
   }),
+  http.get('*/summary/weekly', () => {
+    return HttpResponse.json({
+      from: '2026-05-17',
+      to: '2026-05-23',
+      summaries: [
+        { cognitoSub: 'user1', date: '2026-05-23', dailyPoints: 20 },
+      ],
+    });
+  }),
   http.get('*/histories', () => {
     return HttpResponse.json({
       taskHistories: [],

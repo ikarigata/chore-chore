@@ -44,6 +44,10 @@ export class MockFamilyRepository implements IFamilyRepository {
     return this.dailySummaries
   }
 
+  async getWeeklySummaries(_familyId: FamilyID, _from: string, _to: string): Promise<DailySummary[]> {
+    return this.dailySummaries
+  }
+
   async listTaskHistories(_familyId: FamilyID): Promise<TaskHistory[]> {
     return this.histories
   }

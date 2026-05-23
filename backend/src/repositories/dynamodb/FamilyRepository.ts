@@ -126,6 +126,24 @@ export class DynamoFamilyRepository implements IFamilyRepository {
     return (result.Items ?? []).map((item) => parseDailySummary(item as DynamoItem))
   }
 
+  async getWeeklySummaries(familyId: FamilyID, from: string, to: string): Promise<DailySummary[]> {
+    // SK 形式: DAILY#{YYYY-MM-DD}#{CognitoSub}
+    // BETWEEN は両端含む。終端は `DAILY#{to}~` とすることで `DAILY#{to}#<任意cognitoSub>` を網羅しつつ
+    // 翌日 (`DAILY#{to+1日}...`) を取り込まないようにする（`~` (0x7E) は cognitoSub に含まれる 0-9/a-f/-より大）
+    const result = await this.client.send(
+      new QueryCommand({
+        TableName: TABLE_NAME,
+        KeyConditionExpression: 'FamilyID = :pk AND DataSortKey BETWEEN :start AND :end',
+        ExpressionAttributeValues: {
+          ':pk': familyId,
+          ':start': `DAILY#${from}`,
+          ':end': `DAILY#${to}~`,
+        },
+      }),
+    )
+    return (result.Items ?? []).map((item) => parseDailySummary(item as DynamoItem))
+  }
+
   async listTaskHistories(familyId: FamilyID): Promise<TaskHistory[]> {
     const result = await this.client.send(
       new QueryCommand({
