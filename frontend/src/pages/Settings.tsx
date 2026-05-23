@@ -5,6 +5,7 @@ import { useApp } from '../context';
 import { CATEGORIES } from '../constants';
 import { springStyle, bounceClass, flatBorder } from '../styles';
 import type { LayoutOutletContext } from '../components/Layout';
+import PointInput from '../components/PointInput';
 
 export default function Settings() {
   const { taskMasters, upsertTaskMaster, deleteTaskMaster } = useApp();
@@ -96,7 +97,7 @@ export default function Settings() {
       </button>
 
       {/* 新規家事登録 */}
-      <section className={`bg-yellow-100/50 p-4 rounded-2xl ${flatBorder}`}>
+      <section className={`bg-yellow-100/50 p-4 rounded-2xl ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
         <h2 className="text-base font-black mb-3">新しい家事を作る</h2>
         <form onSubmit={handleUpsertTaskMaster} className="space-y-3">
           <input
@@ -106,25 +107,17 @@ export default function Settings() {
             onChange={e => setNewTaskName(e.target.value)}
             className={`w-full p-3 rounded-xl bg-white ${flatBorder} font-bold placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
           />
-          <div className="flex gap-2">
-            <select
-              value={newTaskCat}
-              onChange={e => setNewTaskCat(e.target.value)}
-              className={`flex-1 p-3 rounded-xl bg-white ${flatBorder} font-bold focus:outline-none focus:ring-2 focus:ring-yellow-400 appearance-none`}
-            >
-              {CATEGORIES.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-            <div className="relative w-24">
-              <input
-                type="number"
-                value={newTaskPoints}
-                onChange={e => setNewTaskPoints(Number(e.target.value))}
-                className={`w-full p-3 rounded-xl bg-white ${flatBorder} font-bold text-right pr-6 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
-              />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-500">pt</span>
-            </div>
+          <select
+            value={newTaskCat}
+            onChange={e => setNewTaskCat(e.target.value)}
+            className={`w-full p-3 rounded-xl bg-white ${flatBorder} font-bold focus:outline-none focus:ring-2 focus:ring-yellow-400 appearance-none`}
+          >
+            {CATEGORIES.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <div className="flex justify-center pt-1">
+            <PointInput value={newTaskPoints} onChange={setNewTaskPoints} />
           </div>
           {error && <p className="text-red-500 text-sm font-bold">{error}</p>}
           <button
@@ -178,25 +171,17 @@ export default function Settings() {
                            className={`flex-1 p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
                          />
                       </div>
-                      <div className="flex gap-2">
-                        <select
-                          value={editTaskCat}
-                          onChange={e => setEditTaskCat(e.target.value)}
-                          className={`flex-1 p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold focus:outline-none focus:ring-2 focus:ring-yellow-400 appearance-none`}
-                        >
-                          {CATEGORIES.map(c => (
-                            <option key={c.id} value={c.id}>{c.name}</option>
-                          ))}
-                        </select>
-                        <div className="relative w-20">
-                          <input
-                            type="number"
-                            value={editTaskPoints}
-                            onChange={e => setEditTaskPoints(Number(e.target.value))}
-                            className={`w-full p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold text-right pr-5 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
-                          />
-                          <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-stone-500">pt</span>
-                        </div>
+                      <select
+                        value={editTaskCat}
+                        onChange={e => setEditTaskCat(e.target.value)}
+                        className={`w-full p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold focus:outline-none focus:ring-2 focus:ring-yellow-400 appearance-none`}
+                      >
+                        {CATEGORIES.map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                      <div className="flex justify-center pt-1">
+                        <PointInput value={editTaskPoints} onChange={setEditTaskPoints} />
                       </div>
                       <div className="flex gap-2 justify-end">
                          <button type="button" onClick={() => setEditingTaskId(null)} className={`p-2 rounded-lg text-stone-500 bg-stone-100 font-bold text-xs ${flatBorder} flex items-center gap-1`}>
