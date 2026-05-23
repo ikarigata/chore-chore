@@ -6,12 +6,24 @@ import UserScore from '../components/UserScore';
 import { springStyle, bounceClass, flatBorder } from '../styles';
 
 export default function Home() {
-  const { members, taskMasters, createTaskHistory, processingId, todaySummaries } = useApp();
+  const { members, taskMasters, createTaskHistory, processingId, todaySummaries, weeklySummaries } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const maxPoints = Math.max(
-    ...members.map(m => todaySummaries.find(s => s.cognitoSub === m.cognitoSub)?.dailyPoints ?? 0),
-    100,
+  // 過去7日分の日付配列（古い順）
+  const dates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Tokyo' }).format(d);
+  });
+
+  // 日ごとの合計ポイントの最大値（Y軸のスケール用、最小100）
+  const maxWeeklyPoints = Math.max(
+    ...dates.map(date => 
+      members.reduce((sum, m) => 
+        sum + (weeklySummaries?.find(s => s.cognitoSub === m.cognitoSub && s.date === date)?.dailyPoints ?? 0)
+      , 0)
+    ),
+    100
   );
 
   return (
@@ -27,21 +39,34 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="h-24 relative flex items-end justify-around pt-4 border-t-2 border-stone-100">
+        <div className="h-32 relative flex items-end justify-between pt-4 border-t-2 border-stone-100">
           <div className="absolute top-0 w-full border-b border-dashed border-stone-200"></div>
           <div className="absolute top-1/2 w-full border-b border-dashed border-stone-200"></div>
 
-          {members.map(m => {
-            const daily = todaySummaries.find(s => s.cognitoSub === m.cognitoSub)?.dailyPoints ?? 0;
+          {dates.map((date, i) => {
+            const isToday = i === 6;
+            const displayDate = new Date(date).getDate(); // 日にちだけ表示
             return (
-              <div key={m.cognitoSub} className="flex flex-col items-center gap-1 flex-1 z-10">
-                <div className="flex gap-1 h-16 items-end">
-                  <div
-                    className={`w-4 ${m.color} rounded-t-sm border-x border-t border-stone-800 transition-all duration-500 ease-out`}
-                    style={{ height: `${(daily / maxPoints) * 100}%`, ...springStyle }}
-                  />
+              <div key={date} className="flex flex-col items-center gap-1 flex-1 z-10">
+                <div className="flex flex-col-reverse w-4 h-24 justify-start">
+                  {members.map(m => {
+                    const daily = weeklySummaries?.find(s => s.cognitoSub === m.cognitoSub && s.date === date)?.dailyPoints ?? 0;
+                    if (daily === 0) return null;
+                    return (
+                      <div
+                        key={m.cognitoSub}
+                        className={`w-full ${m.color} border-x border-t border-stone-800 transition-all duration-500 ease-out first:rounded-b-sm last:rounded-t-sm`}
+                        style={{ height: `${(daily / maxWeeklyPoints) * 100}%`, ...springStyle }}
+                      />
+                    );
+                  })}
+                  {members.every(m => (weeklySummaries?.find(s => s.cognitoSub === m.cognitoSub && s.date === date)?.dailyPoints ?? 0) === 0) && (
+                    <div className="w-full h-0" />
+                  )}
                 </div>
-                <span className="text-[10px] font-bold text-stone-500">{m.displayName}</span>
+                <span className={`text-[10px] font-bold ${isToday ? 'text-teal-600' : 'text-stone-400'}`}>
+                  {isToday ? '今日' : displayDate}
+                </span>
               </div>
             );
           })}
