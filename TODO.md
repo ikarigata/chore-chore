@@ -164,3 +164,14 @@
 - [x] `context.tsx` にエラー状態（`const [initError, setInitError] = useState<string | null>(null)`）を追加する。
 - [x] `init().catch(err => { setInitError(...); setInitialized(true) })` に変更する。
 - [x] `AppProvider` 内でエラー状態を検知した場合、スピナーの代わりに「読み込みに失敗しました。再読み込みしてください」などのエラー画面を表示する。
+
+---
+
+### 🟢 ドキュメント・UI改善（2026-05-23 追記）
+
+#### 家事（マスター）の編集機能
+
+- **状況**: `PUT /tasks` API は更新に対応しているが、フロントエンドの設定画面に編集 UI が存在しない。
+- [ ] 設定画面（`Settings.tsx`）に、既存の家事の名前やポイントを変更できる編集機能を追加。
+
+

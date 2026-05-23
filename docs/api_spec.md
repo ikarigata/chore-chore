@@ -41,12 +41,12 @@
       "users": [
         { "cognitoSub": "...", "displayName": "パパ", "totalPoints": 120 }
       ],
-      "tasks": [
+      "taskMasters": [
         { "taskId": "...", "taskName": "お風呂掃除", "points": 10, "categoryId": "water" }
       ]
     }
     ```
-    * `tasks[].categoryId` は家事カテゴリのID（フロントエンドの `CATEGORIES` 定数に対応）。`Category` 属性を持たない旧データはレスポンスから省略されるため、フロントエンドは未指定時 `"other"` にフォールバックする。
+    * `taskMasters[].categoryId` は家事カテゴリのID（フロントエンドの `CATEGORIES` 定数に対応）。`Category` 属性を持たない旧データはレスポンスから省略されるため、フロントエンドは未指定時 `"other"` にフォールバックする。
 * **DynamoDB操作**: Query
     * PK: `FamilyID` を完全一致で指定します。
     * SK: `begins_with("USER#")` と `begins_with("TASK#")` を指定します。
