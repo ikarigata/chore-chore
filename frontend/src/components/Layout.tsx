@@ -14,7 +14,7 @@ export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const [showQrModal, setShowQrModal] = useState(false)
-  const { members, mySub, initialized } = useApp()
+  const { members, mySub, initialized, initError } = useApp()
 
   const path = location.pathname
   const activeTab = path === '/history' ? 'history' : path === '/settings' ? 'settings' : 'home'
@@ -24,6 +24,21 @@ export default function Layout() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-amber-50">
         <div className="w-8 h-8 border-4 border-teal-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (initError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-amber-50 text-stone-800 px-6 text-center">
+        <p className="font-bold text-lg">読み込みに失敗しました</p>
+        <p className="text-sm text-stone-500">ネットワーク接続を確認して再読み込みしてください</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 px-5 py-2 bg-teal-400 font-bold border-2 border-stone-800 rounded shadow-[2px_2px_0px_#1c1917] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+        >
+          再読み込み
+        </button>
       </div>
     )
   }

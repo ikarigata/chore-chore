@@ -31,6 +31,7 @@ interface AppContextType {
   cancelTask: (item: HistoryItem) => Promise<void>;
   loadingTaskId: string | null;
   initialized: boolean;
+  initError: string | null;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -43,6 +44,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [todaySummaries, setTodaySummaries] = useState<DailySummary[]>([]);
   const [loadingTaskId, setLoadingTaskId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
 
   useEffect(() => {
     async function init() {
@@ -64,7 +66,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setHistory(historiesData.histories);
       setInitialized(true);
     }
-    init().catch(console.error);
+    init().catch(err => {
+      setInitError(err instanceof Error ? err.message : '読み込みに失敗しました');
+      setInitialized(true);
+    });
   }, []);
 
   const addTask = async (task: Task) => {
@@ -83,6 +88,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLoadingTaskId(task.taskId);
     try {
       await apiPost('/tasks/execute', { taskId: task.taskId, taskExecutionId });
+      setMembers(prev => prev.map(m =>
+        m.cognitoSub === mySub ? { ...m, totalPoints: m.totalPoints + task.points } : m
+      ));
       const [summaryData, historiesData] = await Promise.all([
         apiGet<SummaryResponse>('/summary/daily'),
         apiGet<HistoriesResponse>('/histories'),
@@ -100,6 +108,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       timestamp: item.timestamp,
       points: item.points,
     });
+    setMembers(prev => prev.map(m =>
+      m.cognitoSub === mySub ? { ...m, totalPoints: m.totalPoints - item.points } : m
+    ));
     const [summaryData, historiesData] = await Promise.all([
       apiGet<SummaryResponse>('/summary/daily'),
       apiGet<HistoriesResponse>('/histories'),
@@ -109,7 +120,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ mySub, members, tasks, history, todaySummaries, addTask, deleteTask, executeTask, cancelTask, loadingTaskId, initialized }}>
+    <AppContext.Provider value={{ mySub, members, tasks, history, todaySummaries, addTask, deleteTask, executeTask, cancelTask, loadingTaskId, initialized, initError }}>
       {children}
     </AppContext.Provider>
   );

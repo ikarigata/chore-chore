@@ -26,6 +26,7 @@ export interface HistoryItem {
   taskId: string;
   points: number;
   timestamp: string; // ISO 8601
+  expiresAt: number; // UNIX timestamp (TTL)
 }
 
 export interface Category {

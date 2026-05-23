@@ -129,7 +129,7 @@
 - **原因**: `executeTask` 成功後に `GET /summary/daily` と `GET /histories` は再取得するが、`GET /family/init` を再取得しない。`UserScore` コンポーネントが表示する「累計 XX pt」は初回ロード値のまま固まる。
 - **影響**: タスクを完了してもダッシュボードの「累計ポイント」がリロードするまで更新されない（日次ポイントは更新される）。
 
-- [ ] `executeTask` 成功後に `members` も再取得する。`/family/init` を叩き直すか、ローカル state で `ADD totalPoints += task.points` を楽観的に加算する（楽観更新の方がUX上好ましい）。
+- [x] `executeTask` 成功後に `members` も再取得する。`/family/init` を叩き直すか、ローカル state で `ADD totalPoints += task.points` を楽観的に加算する（楽観更新の方がUX上好ましい）。
 
 ---
 
@@ -150,7 +150,7 @@
 - **該当箇所**: `frontend/src/types.ts:23`
 - **状況**: バックエンドの `TaskHistory`（`backend/src/types/domain.ts:24`）は `expiresAt: number` を返すが、フロントの `HistoryItem` にこのフィールドが定義されていない。現時点で `expiresAt` を表示・利用していないため実害はないが、型が実際のAPIレスポンスと乖離している。
 
-- [ ] `HistoryItem` に `expiresAt: number` を追加して型を実態に合わせる。
+- [x] `HistoryItem` に `expiresAt: number` を追加して型を実態に合わせる。
 
 ---
 
@@ -161,6 +161,6 @@
 - **該当箇所**: `frontend/src/context.tsx:67`
 - **現状**: `init().catch(console.error)` でエラーを握り潰しているため、ネットワークエラーや認証エラーが発生した場合に `initialized` が `false` のまま変化せず、アプリが無限ローディング状態になる。
 
-- [ ] `context.tsx` にエラー状態（`const [initError, setInitError] = useState<string | null>(null)`）を追加する。
-- [ ] `init().catch(err => { setInitError(...); setInitialized(true) })` に変更する。
-- [ ] `AppProvider` 内でエラー状態を検知した場合、スピナーの代わりに「読み込みに失敗しました。再読み込みしてください」などのエラー画面を表示する。
+- [x] `context.tsx` にエラー状態（`const [initError, setInitError] = useState<string | null>(null)`）を追加する。
+- [x] `init().catch(err => { setInitError(...); setInitialized(true) })` に変更する。
+- [x] `AppProvider` 内でエラー状態を検知した場合、スピナーの代わりに「読み込みに失敗しました。再読み込みしてください」などのエラー画面を表示する。
