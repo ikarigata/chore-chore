@@ -9,7 +9,7 @@ import type {
   User,
 } from '../types/domain.js'
 
-export interface ExecuteTaskInput {
+export interface CreateTaskHistoryInput {
   taskExecutionId: TaskExecutionID
   taskId: TaskID
   timestamp: string
@@ -19,14 +19,14 @@ export interface ExecuteTaskInput {
   dailyExpiresAt: number
 }
 
-export interface CancelTaskInput {
+export interface DeleteTaskHistoryInput {
   taskExecutionId: TaskExecutionID
   timestamp: string
   points: number
   dailyDate: string
 }
 
-export interface UpsertTaskInput {
+export interface UpsertTaskMasterInput {
   taskId: TaskID
   taskName: string
   points: number
@@ -38,10 +38,10 @@ export interface IFamilyRepository {
   listTaskMasters(familyId: FamilyID): Promise<TaskMaster[]>
   getTaskMaster(familyId: FamilyID, taskId: TaskID): Promise<TaskMaster | null>
   getDailySummaries(familyId: FamilyID, date: string): Promise<DailySummary[]>
-  listHistories(familyId: FamilyID): Promise<TaskHistory[]>
-  executeTask(familyId: FamilyID, cognitoSub: CognitoSub, input: ExecuteTaskInput): Promise<void>
-  cancelTask(familyId: FamilyID, cognitoSub: CognitoSub, input: CancelTaskInput): Promise<void>
-  upsertTaskMaster(familyId: FamilyID, input: UpsertTaskInput): Promise<void>
+  listTaskHistories(familyId: FamilyID): Promise<TaskHistory[]>
+  createTaskHistory(familyId: FamilyID, cognitoSub: CognitoSub, input: CreateTaskHistoryInput): Promise<void>
+  deleteTaskHistory(familyId: FamilyID, cognitoSub: CognitoSub, input: DeleteTaskHistoryInput): Promise<void>
+  upsertTaskMaster(familyId: FamilyID, input: UpsertTaskMasterInput): Promise<void>
   deleteTaskMaster(familyId: FamilyID, taskId: TaskID): Promise<void>
   createFamily(familyId: FamilyID, cognitoSub: CognitoSub, displayName: string): Promise<void>
   createInvite(familyId: FamilyID, token: string, expiresAt: number): Promise<void>

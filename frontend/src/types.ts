@@ -1,33 +1,15 @@
 import type { LucideIcon } from 'lucide-react';
+import type { User as SharedUser, TaskMaster as SharedTaskMaster, DailySummary as SharedDailySummary, TaskHistory as SharedTaskHistory } from '@iezi/shared';
 
-export interface User {
-  cognitoSub: string;
-  displayName: string;
-  totalPoints: number;
+export interface User extends SharedUser {
   color: string; // assigned client-side for visual differentiation
 }
 
-export interface Task {
-  taskId: string;
-  taskName: string;
-  points: number;
-  categoryId: string; // バックエンドの Category 属性に永続化される。未設定の旧データはフロントで 'other' 相当として扱う
-}
+export type TaskMaster = SharedTaskMaster;
 
-export interface DailySummary {
-  cognitoSub: string;
-  date: string;
-  dailyPoints: number;
-}
+export type DailySummary = SharedDailySummary;
 
-export interface HistoryItem {
-  taskExecutionId: string;
-  cognitoSub: string;
-  taskId: string;
-  points: number;
-  timestamp: string; // ISO 8601
-  expiresAt: number; // UNIX timestamp (TTL)
-}
+export type TaskHistory = SharedTaskHistory;
 
 export interface Category {
   id: string;

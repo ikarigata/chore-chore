@@ -1,8 +1,8 @@
 import type {
-  CancelTaskInput,
-  ExecuteTaskInput,
+  DeleteTaskHistoryInput,
+  CreateTaskHistoryInput,
   IFamilyRepository,
-  UpsertTaskInput,
+  UpsertTaskMasterInput,
 } from '../../repositories/IFamilyRepository.js'
 import type {
   CognitoSub,
@@ -21,12 +21,12 @@ export class MockFamilyRepository implements IFamilyRepository {
   dailySummaries: DailySummary[] = []
   histories: TaskHistory[] = []
 
-  executeTaskCalls: Array<[FamilyID, CognitoSub, ExecuteTaskInput]> = []
-  cancelTaskCalls: Array<[FamilyID, CognitoSub, CancelTaskInput]> = []
-  upsertTaskMasterCalls: Array<[FamilyID, UpsertTaskInput]> = []
+  createTaskHistoryCalls: Array<[FamilyID, CognitoSub, CreateTaskHistoryInput]> = []
+  deleteTaskHistoryCalls: Array<[FamilyID, CognitoSub, DeleteTaskHistoryInput]> = []
+  upsertTaskMasterCalls: Array<[FamilyID, UpsertTaskMasterInput]> = []
   deleteTaskMasterCalls: Array<[FamilyID, TaskID]> = []
 
-  executeTaskError?: Error
+  createTaskHistoryError?: Error
 
   async listFamilyMembers(_familyId: FamilyID): Promise<User[]> {
     return this.users
@@ -44,20 +44,20 @@ export class MockFamilyRepository implements IFamilyRepository {
     return this.dailySummaries
   }
 
-  async listHistories(_familyId: FamilyID): Promise<TaskHistory[]> {
+  async listTaskHistories(_familyId: FamilyID): Promise<TaskHistory[]> {
     return this.histories
   }
 
-  async executeTask(familyId: FamilyID, cognitoSub: CognitoSub, input: ExecuteTaskInput): Promise<void> {
-    this.executeTaskCalls.push([familyId, cognitoSub, input])
-    if (this.executeTaskError) throw this.executeTaskError
+  async createTaskHistory(familyId: FamilyID, cognitoSub: CognitoSub, input: CreateTaskHistoryInput): Promise<void> {
+    this.createTaskHistoryCalls.push([familyId, cognitoSub, input])
+    if (this.createTaskHistoryError) throw this.createTaskHistoryError
   }
 
-  async cancelTask(familyId: FamilyID, cognitoSub: CognitoSub, input: CancelTaskInput): Promise<void> {
-    this.cancelTaskCalls.push([familyId, cognitoSub, input])
+  async deleteTaskHistory(familyId: FamilyID, cognitoSub: CognitoSub, input: DeleteTaskHistoryInput): Promise<void> {
+    this.deleteTaskHistoryCalls.push([familyId, cognitoSub, input])
   }
 
-  async upsertTaskMaster(familyId: FamilyID, input: UpsertTaskInput): Promise<void> {
+  async upsertTaskMaster(familyId: FamilyID, input: UpsertTaskMasterInput): Promise<void> {
     this.upsertTaskMasterCalls.push([familyId, input])
   }
 

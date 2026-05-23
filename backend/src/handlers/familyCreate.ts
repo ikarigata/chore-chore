@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { FamilyCreateRequestSchema } from '@iezi/shared'
 import { AppError } from '../errors.js'
 import type { IFamilyRepository } from '../repositories/IFamilyRepository.js'
 import type { ICognitoService } from '../services/ICognitoService.js'
@@ -16,12 +17,14 @@ export async function familyCreateHandler(
 ): Promise<HandlerResponse> {
   if (ctx.familyId) throw new AppError(409, '既に家族に所属しています')
 
-  const body = req.body as { displayName?: unknown }
-  const displayName = typeof body.displayName === 'string' ? body.displayName.trim() : ''
-  if (!displayName) throw new AppError(400, 'displayName は必須です')
+  const result = FamilyCreateRequestSchema.safeParse(req.body)
+  if (!result.success) {
+    throw new AppError(400, `入力形式が正しくありません: ${result.error.message}`)
+  }
+  const { displayName } = result.data
 
   const familyId = `fam_${randomUUID()}`
-  await deps.familyRepo.createFamily(familyId, ctx.cognitoSub, displayName)
+  await deps.familyRepo.createFamily(familyId, ctx.cognitoSub, displayName.trim())
   await deps.cognitoService.setFamilyId(ctx.cognitoSub, familyId)
 
   return { statusCode: 200, body: { familyId } }

@@ -10,6 +10,6 @@ export async function historiesHandler(
   _req: HandlerRequest,
   deps: Deps,
 ): Promise<HandlerResponse> {
-  const histories = await deps.familyRepo.listHistories(ctx.familyId)
-  return { statusCode: 200, body: { histories } }
+  const taskHistories = await deps.familyRepo.listTaskHistories(ctx.familyId)
+  return { statusCode: 200, body: { taskHistories } }
 }

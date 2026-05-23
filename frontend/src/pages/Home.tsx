@@ -6,7 +6,7 @@ import UserScore from '../components/UserScore';
 import { springStyle, bounceClass, flatBorder } from '../styles';
 
 export default function Home() {
-  const { members, tasks, executeTask, loadingTaskId, todaySummaries } = useApp();
+  const { members, taskMasters, createTaskHistory, processingId, todaySummaries } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const maxPoints = Math.max(
@@ -87,7 +87,7 @@ export default function Home() {
               </h2>
             </div>
 
-            {tasks.filter(t => t.categoryId === selectedCategory).map(task => (
+            {taskMasters.filter(t => t.categoryId === selectedCategory).map(task => (
               <div key={task.taskId} className={`bg-white p-3 rounded-2xl ${flatBorder} flex items-center justify-between shadow-[2px_2px_0px_#292524]`}>
                 <div>
                   <div className="font-bold">{task.taskName}</div>
@@ -96,12 +96,12 @@ export default function Home() {
                   </div>
                 </div>
                 <button
-                  onClick={() => executeTask(task)}
-                  disabled={loadingTaskId !== null}
-                  className={`bg-teal-200 px-4 py-2 rounded-full font-bold ${flatBorder} flex items-center gap-1 transition-all ${loadingTaskId === task.taskId ? 'opacity-80 scale-95' : bounceClass}`}
+                  onClick={() => createTaskHistory(task)}
+                  disabled={processingId !== null}
+                  className={`bg-teal-200 px-4 py-2 rounded-full font-bold ${flatBorder} flex items-center gap-1 transition-all ${processingId === task.taskId ? 'opacity-80 scale-95' : bounceClass}`}
                   style={springStyle}
                 >
-                  {loadingTaskId === task.taskId ? (
+                  {processingId === task.taskId ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <>
@@ -113,7 +113,7 @@ export default function Home() {
               </div>
             ))}
 
-            {tasks.filter(t => t.categoryId === selectedCategory).length === 0 && (
+            {taskMasters.filter(t => t.categoryId === selectedCategory).length === 0 && (
               <div className="text-center py-8 text-stone-500 font-bold border-2 border-dashed border-stone-300 rounded-2xl">
                 このカテゴリの家事はありません
               </div>

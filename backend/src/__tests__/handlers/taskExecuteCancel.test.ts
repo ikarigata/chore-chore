@@ -25,8 +25,8 @@ describe('taskExecuteCancelHandler', () => {
     )
 
     expect(res.statusCode).toBe(200)
-    expect(repo.cancelTaskCalls).toHaveLength(1)
-    const [fid, sub, input] = repo.cancelTaskCalls[0]!
+    expect(repo.deleteTaskHistoryCalls).toHaveLength(1)
+    const [fid, sub, input] = repo.deleteTaskHistoryCalls[0]!
     expect(fid).toBe('family-1')
     expect(sub).toBe('sub-1')
     expect(input.taskExecutionId).toBe('exec-1')
@@ -44,22 +44,22 @@ describe('taskExecuteCancelHandler', () => {
       makeReq({ taskExecutionId: 'exec-2', timestamp, points: 5 }),
       { familyRepo: repo },
     )
-    expect(repo.cancelTaskCalls[0]![2].dailyDate).toBe('2024-06-15')
+    expect(repo.deleteTaskHistoryCalls[0]![2].dailyDate).toBe('2024-06-15')
   })
 
   it('必須フィールドが欠けている場合 400 を投げる', async () => {
     await expect(
       taskExecuteCancelHandler(CTX, makeReq({ taskExecutionId: 'e', timestamp: 't' }), { familyRepo: repo }),
-    ).rejects.toThrow(new AppError(400, 'taskExecutionId、timestamp、points は必須です'))
+    ).rejects.toThrow()
   })
 
-  it('points が 0 以下の場合 400 を投げる', async () => {
+  it('points が負の場合 400 を投げる', async () => {
     await expect(
       taskExecuteCancelHandler(
         CTX,
-        makeReq({ taskExecutionId: 'e', timestamp: '2024-01-01T00:00:00Z', points: 0 }),
+        makeReq({ taskExecutionId: 'e', timestamp: '2024-01-01T00:00:00Z', points: -1 }),
         { familyRepo: repo },
       ),
-    ).rejects.toThrow(new AppError(400, 'points は正の値である必要があります'))
+    ).rejects.toThrow(new AppError(400, 'points は0以上である必要があります'))
   })
 })

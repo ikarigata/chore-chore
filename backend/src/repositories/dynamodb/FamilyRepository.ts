@@ -9,10 +9,10 @@ import {
 } from '@aws-sdk/lib-dynamodb'
 import { AppError } from '../../errors.js'
 import type {
-  CancelTaskInput,
-  ExecuteTaskInput,
+  DeleteTaskHistoryInput,
+  CreateTaskHistoryInput,
   IFamilyRepository,
-  UpsertTaskInput,
+  UpsertTaskMasterInput,
 } from '../IFamilyRepository.js'
 import type {
   CognitoSub,
@@ -126,7 +126,7 @@ export class DynamoFamilyRepository implements IFamilyRepository {
     return (result.Items ?? []).map((item) => parseDailySummary(item as DynamoItem))
   }
 
-  async listHistories(familyId: FamilyID): Promise<TaskHistory[]> {
+  async listTaskHistories(familyId: FamilyID): Promise<TaskHistory[]> {
     const result = await this.client.send(
       new QueryCommand({
         TableName: TABLE_NAME,
@@ -138,10 +138,10 @@ export class DynamoFamilyRepository implements IFamilyRepository {
     return (result.Items ?? []).map((item) => parseTaskHistory(item as DynamoItem))
   }
 
-  async executeTask(
+  async createTaskHistory(
     familyId: FamilyID,
     cognitoSub: CognitoSub,
-    input: ExecuteTaskInput,
+    input: CreateTaskHistoryInput,
   ): Promise<void> {
     try {
       await this.client.send(
@@ -197,10 +197,10 @@ export class DynamoFamilyRepository implements IFamilyRepository {
     }
   }
 
-  async cancelTask(
+  async deleteTaskHistory(
     familyId: FamilyID,
     cognitoSub: CognitoSub,
-    input: CancelTaskInput,
+    input: DeleteTaskHistoryInput,
   ): Promise<void> {
     try {
       await this.client.send(
@@ -250,7 +250,7 @@ export class DynamoFamilyRepository implements IFamilyRepository {
     }
   }
 
-  async upsertTaskMaster(familyId: FamilyID, input: UpsertTaskInput): Promise<void> {
+  async upsertTaskMaster(familyId: FamilyID, input: UpsertTaskMasterInput): Promise<void> {
     const item: Record<string, unknown> = {
       FamilyID: familyId,
       DataSortKey: `TASK#${input.taskId}`,

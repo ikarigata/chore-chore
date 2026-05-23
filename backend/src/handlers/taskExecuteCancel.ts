@@ -1,3 +1,4 @@
+import { TaskHistoryDeleteRequestSchema } from '@iezi/shared'
 import { AppError } from '../errors.js'
 import type { IFamilyRepository } from '../repositories/IFamilyRepository.js'
 import type { HandlerRequest, HandlerResponse, RequestContext } from '../types/domain.js'
@@ -7,30 +8,26 @@ interface Deps {
   familyRepo: IFamilyRepository
 }
 
-interface CancelBody {
-  taskExecutionId?: string
-  timestamp?: string
-  points?: number
-}
-
 export async function taskExecuteCancelHandler(
   ctx: RequestContext,
   req: HandlerRequest,
   deps: Deps,
 ): Promise<HandlerResponse> {
-  const { taskExecutionId, timestamp, points } = req.body as CancelBody
-
-  if (!taskExecutionId || !timestamp || points === undefined) {
-    throw new AppError(400, 'taskExecutionId、timestamp、points は必須です')
+  const result = TaskHistoryDeleteRequestSchema.safeParse(req.body)
+  if (!result.success) {
+    throw new AppError(400, `入力形式が正しくありません: ${result.error.message}`)
   }
-  if (points <= 0) {
-    throw new AppError(400, 'points は正の値である必要があります')
+
+  const { taskExecutionId, timestamp, points } = result.data
+
+  if (points < 0) {
+    throw new AppError(400, 'points は0以上である必要があります')
   }
 
   // 元の履歴のタイムスタンプから JST 日付を復元して DAILY SK を構築する
   const dailyDate = getJSTDateString(new Date(timestamp))
 
-  await deps.familyRepo.cancelTask(ctx.familyId, ctx.cognitoSub, {
+  await deps.familyRepo.deleteTaskHistory(ctx.familyId, ctx.cognitoSub, {
     taskExecutionId,
     timestamp,
     points,

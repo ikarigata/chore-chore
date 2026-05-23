@@ -39,14 +39,14 @@ describe('taskUpsertHandler', () => {
   it('必須フィールドが欠けている場合 400 を投げる', async () => {
     await expect(
       taskUpsertHandler(CTX, makeReq({ taskId: 't', taskName: '名前' }), { familyRepo: repo }),
-    ).rejects.toThrow(new AppError(400, 'taskId、taskName、points は必須です'))
+    ).rejects.toThrow()
   })
 
   it('points が負の場合 400 を投げる', async () => {
     await expect(
       taskUpsertHandler(
         CTX,
-        makeReq({ taskId: 't', taskName: '名前', points: -1, icon: 'i' }),
+        makeReq({ taskId: 't', taskName: '名前', points: -1 }),
         { familyRepo: repo },
       ),
     ).rejects.toThrow(new AppError(400, 'points は0以上である必要があります'))

@@ -7,7 +7,7 @@ import { springStyle, bounceClass, flatBorder } from '../styles';
 import type { LayoutOutletContext } from '../components/Layout';
 
 export default function Settings() {
-  const { tasks, addTask, deleteTask } = useApp();
+  const { taskMasters, upsertTaskMaster, deleteTaskMaster } = useApp();
   const { onOpenQr } = useOutletContext<LayoutOutletContext>();
 
   const [newTaskName, setNewTaskName] = useState('');
@@ -18,13 +18,13 @@ export default function Settings() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  const handleAddTask = async (e: React.FormEvent) => {
+  const handleUpsertTaskMaster = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskName.trim()) return;
     setError('');
     setSubmitting(true);
     try {
-      await addTask({
+      await upsertTaskMaster({
         taskId: crypto.randomUUID(),
         taskName: newTaskName.trim(),
         points: Number(newTaskPoints),
@@ -39,10 +39,10 @@ export default function Settings() {
     }
   };
 
-  const handleDeleteTask = async (taskId: string) => {
+  const handleDeleteTaskMaster = async (taskId: string) => {
     setDeletingId(taskId);
     try {
-      await deleteTask(taskId);
+      await deleteTaskMaster(taskId);
     } catch (err) {
       setError((err as Error).message ?? '削除に失敗しました');
     } finally {
@@ -73,7 +73,7 @@ export default function Settings() {
       {/* 新規家事登録 */}
       <section className={`bg-yellow-100/50 p-4 rounded-2xl ${flatBorder}`}>
         <h2 className="text-base font-black mb-3">新しい家事を作る</h2>
-        <form onSubmit={handleAddTask} className="space-y-3">
+        <form onSubmit={handleUpsertTaskMaster} className="space-y-3">
           <input
             type="text"
             placeholder="家事の名前"
@@ -137,7 +137,7 @@ export default function Settings() {
         </div>
 
         <div className="space-y-2">
-          {tasks
+          {taskMasters
             .filter(t => (filterCat ? t.categoryId === filterCat : true))
             .map(task => {
               const cat = CATEGORIES.find(c => c.id === task.categoryId);
@@ -152,7 +152,7 @@ export default function Settings() {
                   <div className="flex items-center gap-2">
                     <span className="font-black text-sm">{task.points}pt</span>
                     <button
-                      onClick={() => handleDeleteTask(task.taskId)}
+                      onClick={() => handleDeleteTaskMaster(task.taskId)}
                       disabled={deletingId === task.taskId}
                       className={`p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors ${flatBorder}`}
                     >

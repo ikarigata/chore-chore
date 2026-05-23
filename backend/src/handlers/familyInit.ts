@@ -10,9 +10,9 @@ export async function familyInitHandler(
   _req: HandlerRequest,
   deps: Deps,
 ): Promise<HandlerResponse> {
-  const [users, tasks] = await Promise.all([
+  const [users, taskMasters] = await Promise.all([
     deps.familyRepo.listFamilyMembers(ctx.familyId),
     deps.familyRepo.listTaskMasters(ctx.familyId),
   ])
-  return { statusCode: 200, body: { users, tasks } }
+  return { statusCode: 200, body: { users, taskMasters } }
 }

@@ -1,3 +1,4 @@
+import { TaskHistoryCreateRequestSchema } from '@iezi/shared'
 import { AppError } from '../errors.js'
 import type { IFamilyRepository } from '../repositories/IFamilyRepository.js'
 import type { HandlerRequest, HandlerResponse, RequestContext } from '../types/domain.js'
@@ -7,21 +8,17 @@ interface Deps {
   familyRepo: IFamilyRepository
 }
 
-interface ExecuteBody {
-  taskId?: string
-  taskExecutionId?: string
-}
-
 export async function taskExecuteHandler(
   ctx: RequestContext,
   req: HandlerRequest,
   deps: Deps,
 ): Promise<HandlerResponse> {
-  const { taskId, taskExecutionId } = req.body as ExecuteBody
-
-  if (!taskId || !taskExecutionId) {
-    throw new AppError(400, 'taskId と taskExecutionId は必須です')
+  const result = TaskHistoryCreateRequestSchema.safeParse(req.body)
+  if (!result.success) {
+    throw new AppError(400, `入力形式が正しくありません: ${result.error.message}`)
   }
+
+  const { taskId, taskExecutionId } = result.data
 
   const task = await deps.familyRepo.getTaskMaster(ctx.familyId, taskId)
   if (!task) {
@@ -29,7 +26,7 @@ export async function taskExecuteHandler(
   }
 
   const now = new Date()
-  await deps.familyRepo.executeTask(ctx.familyId, ctx.cognitoSub, {
+  await deps.familyRepo.createTaskHistory(ctx.familyId, ctx.cognitoSub, {
     taskExecutionId,
     taskId,
     timestamp: now.toISOString(),
