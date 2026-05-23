@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { QrCode, Plus, Trash2, Loader2 } from 'lucide-react';
+import { QrCode, Plus, Trash2, Loader2, Pencil, X, Check } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useApp } from '../context';
 import { CATEGORIES } from '../constants';
@@ -17,6 +17,31 @@ export default function Settings() {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState('');
+
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editTaskName, setEditTaskName] = useState('');
+  const [editTaskPoints, setEditTaskPoints] = useState(10);
+  const [editTaskCat, setEditTaskCat] = useState('cooking');
+
+  const handleUpdateTaskMaster = async (e: React.FormEvent, taskId: string) => {
+    e.preventDefault();
+    if (!editTaskName.trim()) return;
+    setError('');
+    setSubmitting(true);
+    try {
+      await upsertTaskMaster({
+        taskId,
+        taskName: editTaskName.trim(),
+        points: Number(editTaskPoints),
+        categoryId: editTaskCat,
+      });
+      setEditingTaskId(null);
+    } catch (err) {
+      setError((err as Error).message ?? '保存に失敗しました');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleUpsertTaskMaster = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,25 +167,81 @@ export default function Settings() {
             .map(task => {
               const cat = CATEGORIES.find(c => c.id === task.categoryId);
               return (
-                <div key={task.taskId} className={`bg-white p-3 rounded-xl ${flatBorder} flex items-center justify-between`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full ${cat?.color ?? 'bg-stone-100'} ${flatBorder} flex items-center justify-center`}>
-                      {cat && <cat.icon className="w-4 h-4" />}
+                <div key={task.taskId} className={`bg-white p-3 rounded-xl ${flatBorder} flex flex-col gap-2`}>
+                  {editingTaskId === task.taskId ? (
+                    <form onSubmit={(e) => handleUpdateTaskMaster(e, task.taskId)} className="space-y-3 w-full">
+                      <div className="flex gap-2">
+                         <input
+                           type="text"
+                           value={editTaskName}
+                           onChange={e => setEditTaskName(e.target.value)}
+                           className={`flex-1 p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                         />
+                      </div>
+                      <div className="flex gap-2">
+                        <select
+                          value={editTaskCat}
+                          onChange={e => setEditTaskCat(e.target.value)}
+                          className={`flex-1 p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold focus:outline-none focus:ring-2 focus:ring-yellow-400 appearance-none`}
+                        >
+                          {CATEGORIES.map(c => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                        <div className="relative w-20">
+                          <input
+                            type="number"
+                            value={editTaskPoints}
+                            onChange={e => setEditTaskPoints(Number(e.target.value))}
+                            className={`w-full p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold text-right pr-5 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                          />
+                          <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-stone-500">pt</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 justify-end">
+                         <button type="button" onClick={() => setEditingTaskId(null)} className={`p-2 rounded-lg text-stone-500 bg-stone-100 font-bold text-xs ${flatBorder} flex items-center gap-1`}>
+                           <X className="w-4 h-4" /> キャンセル
+                         </button>
+                         <button type="submit" disabled={submitting} className={`p-2 rounded-lg text-stone-900 bg-yellow-300 font-bold text-xs ${flatBorder} flex items-center gap-1`}>
+                           {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} 保存
+                         </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full ${cat?.color ?? 'bg-stone-100'} ${flatBorder} flex items-center justify-center`}>
+                          {cat && <cat.icon className="w-4 h-4" />}
+                        </div>
+                        <span className="font-bold text-sm">{task.taskName}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-sm">{task.points}pt</span>
+                        <div className="flex items-center">
+                          <button
+                            onClick={() => {
+                              setEditingTaskId(task.taskId);
+                              setEditTaskName(task.taskName);
+                              setEditTaskPoints(task.points);
+                              setEditTaskCat(task.categoryId || 'other');
+                            }}
+                            className={`p-1.5 rounded-lg text-stone-400 hover:text-teal-600 hover:bg-teal-50 transition-colors ${flatBorder}`}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTaskMaster(task.taskId)}
+                            disabled={deletingId === task.taskId}
+                            className={`p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors ${flatBorder}`}
+                          >
+                            {deletingId === task.taskId
+                              ? <Loader2 className="w-4 h-4 animate-spin" />
+                              : <Trash2 className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <span className="font-bold text-sm">{task.taskName}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-black text-sm">{task.points}pt</span>
-                    <button
-                      onClick={() => handleDeleteTaskMaster(task.taskId)}
-                      disabled={deletingId === task.taskId}
-                      className={`p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors ${flatBorder}`}
-                    >
-                      {deletingId === task.taskId
-                        ? <Loader2 className="w-4 h-4 animate-spin" />
-                        : <Trash2 className="w-4 h-4" />}
-                    </button>
-                  </div>
+                  )}
                 </div>
               );
             })}
