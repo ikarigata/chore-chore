@@ -83,6 +83,14 @@ resource "aws_cloudwatch_log_group" "lambda" {
 # Lambda ZIP（esbuild バンドル成果物をパッケージ化）
 # ============================================================
 # 事前に `npm run build -w backend` を実行しておくこと
+#
+# 重要: ここは必ず `source_file`（単一ファイル）を指定すること。
+#   backend/package.json には `"type": "module"` が設定されており、
+#   esbuild は `--format=cjs` で CJS バンドルを出力する。両者が同居すると
+#   Node.js は `.js` を ESM 解釈しようとして起動に失敗する。
+#   `source_file` で index.js だけを ZIP に入れることで package.json を
+#   含めず、Lambda のランタイムが `.js` を CJS として扱う既定動作に乗せる。
+#   `source_dir` への変更や、dist/ 配下に package.json を出力する変更は禁止。
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = var.lambda_dist_path

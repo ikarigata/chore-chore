@@ -5,7 +5,10 @@ import {
 import type { CognitoSub, FamilyID } from '../../types/domain.js'
 import type { ICognitoService } from '../ICognitoService.js'
 
-const USER_POOL_ID = process.env.COGNITO_USER_POOL_ID ?? ''
+const USER_POOL_ID = process.env.COGNITO_USER_POOL_ID
+if (!USER_POOL_ID) {
+  throw new Error('COGNITO_USER_POOL_ID environment variable is required')
+}
 
 export class CognitoService implements ICognitoService {
   constructor(private readonly client: CognitoIdentityProviderClient) {}

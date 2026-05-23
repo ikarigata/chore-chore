@@ -114,11 +114,12 @@
 
 ### 5.2. Terraform stateのリモート管理
 
-Terraform stateは **S3バケット + DynamoDBテーブル（state lock用）** の組み合わせでリモート管理します。
+Terraform stateは **S3バケット（S3ネイティブロック）** でリモート管理します。
 
 - ローカルにstateを置かないことで、state紛失リスクおよび環境間の競合を防止。
 - stateバケットはバージョニング有効化・パブリックアクセス全ブロック・暗号化（SSE-S3）を施します。
-- stateロック用DynamoDBテーブルにより、同時 `terraform apply` を安全に排他制御します。
+- ロック制御は `use_lockfile = true`（Terraform 1.10以上）によるS3ネイティブロックを採用。バージョニングが有効なS3バケット上に `.tflock` ファイルを作成して排他制御するため、DynamoDBテーブルは不要です。
+- stateバケットはTerraform管理外（手動作成）とし、ブートストラップ問題を回避します。
 
 ### 5.3. 環境分離方針
 

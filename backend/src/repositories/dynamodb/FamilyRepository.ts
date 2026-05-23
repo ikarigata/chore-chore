@@ -24,8 +24,11 @@ import type {
   User,
 } from '../../types/domain.js'
 
-const TABLE_NAME = process.env.TABLE_NAME ?? 'FamilyAppTable'
-const INVITE_TABLE_NAME = process.env.INVITE_TABLE_NAME ?? 'FamilyInviteTable'
+const TABLE_NAME = process.env.TABLE_NAME
+const INVITE_TABLE_NAME = process.env.INVITE_TABLE_NAME
+if (!TABLE_NAME || !INVITE_TABLE_NAME) {
+  throw new Error('TABLE_NAME / INVITE_TABLE_NAME environment variables are required')
+}
 
 type DynamoItem = Record<string, unknown>
 
@@ -322,7 +325,10 @@ export class DynamoFamilyRepository implements IFamilyRepository {
                 TableName: INVITE_TABLE_NAME,
                 Key: { Token: token },
                 UpdateExpression: 'SET UsedAt = :usedAt, UsedBy = :usedBy',
-                ConditionExpression: 'attribute_not_exists(UsedAt) OR UsedBy = :usedBy',
+                // attribute_exists(Token) で TTL 削除との競合をブロック（不滅レコードの誤生成防止）
+                ConditionExpression:
+                  'attribute_exists(#tk) AND (attribute_not_exists(UsedAt) OR UsedBy = :usedBy)',
+                ExpressionAttributeNames: { '#tk': 'Token' },
                 ExpressionAttributeValues: {
                   ':usedAt': Math.floor(Date.now() / 1000),
                   ':usedBy': cognitoSub,

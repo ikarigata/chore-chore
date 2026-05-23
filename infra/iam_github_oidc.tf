@@ -11,13 +11,25 @@ resource "aws_iam_openid_connect_provider" "github" {
 
   client_id_list = ["sts.amazonaws.com"]
 
-  # GitHub OIDC の thumbprint（2023年以降は AWS が自動管理）
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+  # GitHub OIDC の thumbprint（2023年に認証局更新。両方を指定する）
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1", # 旧 CA
+    "1c58a3a8518e8759bf075b76b750d4f2df264fcd", # 新 CA（2023年10月〜）
+  ]
 }
 
 # ============================================================
 # GitHub Actions デプロイロール
 # ============================================================
+# 責務範囲:
+#   - Lambda 関数のコード更新（lambda:UpdateFunctionCode）
+#   - フロントエンド S3 へのアップロード（s3:PutObject / DeleteObject / ListBucket）
+#   - CloudFront キャッシュ無効化（cloudfront:CreateInvalidation）
+#
+# Terraform 自体（IAM / API Gateway / Cognito / DynamoDB の作成・更新）の実行権限は
+# 意図的に付与していない。インフラ変更はローカル or 管理者権限を持つ別経路で
+# `terraform apply` する運用とする（最小権限の原則）。
+# 詳細は docs/infrastructure.md §5.2, §5.4 を参照。
 resource "aws_iam_role" "github_deploy" {
   name = "${local.prefix}-github-deploy"
 

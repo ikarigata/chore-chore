@@ -2,7 +2,8 @@
 # Cognito ユーザープール
 # ============================================================
 resource "aws_cognito_user_pool" "main" {
-  name = local.prefix
+  name               = local.prefix
+  deletion_protection = "ACTIVE"
 
   # パスワードポリシー（デフォルトより緩めて UX を改善）
   password_policy {

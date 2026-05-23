@@ -10,7 +10,7 @@
 
 - **バックエンド**: TypeScript (Node.js) によるファットLambda（全エンドポイントを esbuild で単一ファイルにバンドルして集約）
 - **フロントエンド**: React SPA（SSRなし）
-- **データベース**: Amazon DynamoDB（シングルテーブルデザイン、テーブル名: `FamilyAppTable`）
+- **データベース**: Amazon DynamoDB（シングルテーブルデザイン、テーブル名: `iezi-{env}-FamilyAppTable`）
 - **認証**: Amazon Cognito — ユーザー識別子は必ず `CognitoSub` を使用。PII（個人情報）は Cognito 側に留め、DynamoDB には保存しない
 - **インフラ**: Terraform (HCL)、`infra/` ディレクトリ
 
@@ -54,7 +54,7 @@ terraform apply -var-file=<env>.tfvars
 
 ## DynamoDB キー設計（重要）
 
-テーブル: `FamilyAppTable` — シングルテーブルデザイン、オンデマンドキャパシティ。
+テーブル: `iezi-{env}-FamilyAppTable`（例: `iezi-prod-FamilyAppTable`）— シングルテーブルデザイン、オンデマンドキャパシティ。
 
 | エンティティ | PK | SK |
 |---|---|---|
