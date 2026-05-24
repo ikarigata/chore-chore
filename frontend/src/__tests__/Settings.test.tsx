@@ -110,6 +110,12 @@ describe('Settings Page', () => {
     if (!deleteButton) throw new Error('Delete button not found');
     fireEvent.click(deleteButton);
 
+    // 確認ダイアログが表示されるのを待って「削除」ボタンをクリック
+    await waitFor(() => {
+      expect(screen.getByText('本当に削除しますか？')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('button', { name: '削除' }));
+
     await waitFor(() => {
       expect(screen.queryByText('お風呂掃除')).not.toBeInTheDocument();
     });

@@ -37,11 +37,29 @@ export default function UserScore({ user, dailyPoints, weeklyPoints }: Props) {
         </div>
       </div>
 
-      {/* 累計 */}
+      {/* 家事累計 */}
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold text-stone-400">累計</span>
+        <span className="text-[10px] font-bold text-stone-400">家事累計</span>
         <div className="flex items-baseline gap-0.5">
           <span className="text-sm font-black text-stone-700">{user.totalPoints.toLocaleString()}</span>
+          <span className="text-[10px] font-bold text-stone-400">pt</span>
+        </div>
+      </div>
+
+      {/* ねぎらい累計 */}
+      <div className="flex items-center justify-between mt-1">
+        <span className="text-[10px] font-bold text-brand-rose">ねぎらい</span>
+        <div className="flex items-baseline gap-0.5">
+          <span className="text-sm font-black text-brand-rose">{(user.neguraiPoints ?? 0).toLocaleString()}</span>
+          <span className="text-[10px] font-bold text-stone-400">pt</span>
+        </div>
+      </div>
+
+      {/* トータル */}
+      <div className="flex items-center justify-between mt-1 pt-1 border-t border-dashed border-stone-200">
+        <span className="text-[10px] font-bold text-stone-600">トータル</span>
+        <div className="flex items-baseline gap-0.5">
+          <span className="text-sm font-black text-stone-900">{(user.totalPoints + (user.neguraiPoints ?? 0)).toLocaleString()}</span>
           <span className="text-[10px] font-bold text-stone-400">pt</span>
         </div>
       </div>

@@ -2,15 +2,17 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, ty
 import { fetchAuthSession } from 'aws-amplify/auth';
 import {
   FamilyInitResponseSchema,
+  NeguraiListResponseSchema,
   SummaryDailyResponseSchema,
   SummaryWeeklyResponseSchema,
   TaskHistoryListResponseSchema,
   type FamilyInitResponse,
+  type NeguraiListResponse,
   type SummaryDailyResponse,
   type SummaryWeeklyResponse,
   type TaskHistoryListResponse,
 } from '@iezi/shared';
-import type { User, TaskMaster, TaskHistory, DailySummary } from './types';
+import type { User, TaskMaster, TaskHistory, DailySummary, Negurai } from './types';
 import { apiGet, apiPost, apiPut, apiDelete } from './lib/api';
 import { dateKeyToTimestamp, getJSTDateString } from './lib/time';
 
@@ -40,11 +42,14 @@ interface AppContextType {
   taskHistories: TaskHistory[];
   todaySummaries: DailySummary[];
   weeklySummaries: DailySummary[];
+  negurai: Negurai[];
   upsertTaskMaster: (task: TaskMaster) => Promise<void>;
   deleteTaskMaster: (taskId: string) => Promise<void>;
   createTaskHistory: (task: TaskMaster, opts?: { dateKey?: string }) => Promise<void>;
   deleteTaskHistory: (item: TaskHistory) => Promise<void>;
   updateTaskHistoryDate: (item: TaskHistory, newDateKey: string) => Promise<void>;
+  createNegurai: (giverSub: string, description: string, points: number) => Promise<void>;
+  deleteNegurai: (item: Negurai) => Promise<void>;
   processingId: string | null;
   initialized: boolean;
   initError: string | null;
@@ -59,6 +64,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [taskHistories, setTaskHistories] = useState<TaskHistory[]>([]);
   const [todaySummaries, setTodaySummaries] = useState<DailySummary[]>([]);
   const [weeklySummaries, setWeeklySummaries] = useState<DailySummary[]>([]);
+  const [negurai, setNegurai] = useState<Negurai[]>([]);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
@@ -66,11 +72,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const refreshAllData = useCallback(async () => {
     const token = ++refreshTokenRef.current;
-    const [initData, summaryData, weeklyData, historiesData] = await Promise.all([
+    const [initData, summaryData, weeklyData, historiesData, neguraiData] = await Promise.all([
       apiGet<FamilyInitResponse>('/family/init', FamilyInitResponseSchema),
       apiGet<SummaryDailyResponse>('/summary/daily', SummaryDailyResponseSchema),
       apiGet<SummaryWeeklyResponse>('/summary/weekly', SummaryWeeklyResponseSchema),
       apiGet<TaskHistoryListResponse>('/histories', TaskHistoryListResponseSchema),
+      apiGet<NeguraiListResponse>('/negurai', NeguraiListResponseSchema),
     ]);
     if (token !== refreshTokenRef.current) return;
     setMembers(prev => assignMemberColors(initData.users, prev));
@@ -78,6 +85,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTodaySummaries(summaryData.summaries);
     setWeeklySummaries(weeklyData.summaries);
     setTaskHistories(historiesData.taskHistories);
+    setNegurai(neguraiData.negurai);
   }, []);
 
   useEffect(() => {
@@ -161,6 +169,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const createNegurai = async (giverSub: string, description: string, points: number) => {
+    if (processingId || !mySub) return;
+    const neguraiId = crypto.randomUUID();
+    setProcessingId('negurai');
+    try {
+      await apiPost('/negurai', { neguraiId, giverSub, description, points });
+      await refreshAllData();
+    } catch (err) {
+      console.error('ねぎらいの登録に失敗しました', err);
+      throw err;
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const deleteNegurai = async (item: Negurai) => {
+    if (processingId || !mySub) return;
+    setProcessingId(item.neguraiId);
+    try {
+      await apiDelete('/negurai', {
+        neguraiId: item.neguraiId,
+        timestamp: item.timestamp,
+        points: item.points,
+        giverSub: item.giverSub,
+      });
+      await refreshAllData();
+    } catch (err) {
+      console.error('ねぎらいの取り消しに失敗しました', err);
+      throw err;
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   // 家事実績の日付編集は spec の鉄則どおり「削除→再登録（新 UUID）」の2段で行う
   const updateTaskHistoryDate = async (item: TaskHistory, newDateKey: string) => {
     if (processingId || !mySub) return;
@@ -202,11 +244,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       taskHistories,
       todaySummaries,
       weeklySummaries,
+      negurai,
       upsertTaskMaster,
       deleteTaskMaster,
       createTaskHistory,
       deleteTaskHistory,
       updateTaskHistoryDate,
+      createNegurai,
+      deleteNegurai,
       processingId,
       initialized,
       initError

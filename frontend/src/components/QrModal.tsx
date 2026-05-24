@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { X, QrCode, Loader2, Copy, Check } from 'lucide-react'
+import { X, Loader2, Copy, Check } from 'lucide-react'
+import QRCode from 'react-qr-code'
 import { flatBorder, bounceClass } from '../styles'
 import { apiPost } from '../lib/api'
 
@@ -50,8 +51,14 @@ export default function QrModal({ onClose }: QrModalProps) {
           <div className="text-center py-8 text-red-500 font-bold">{error}</div>
         ) : (
           <>
-            <div className={`w-48 h-48 mx-auto bg-stone-100 rounded-2xl ${flatBorder} flex items-center justify-center mb-6`}>
-              <QrCode className="w-24 h-24 text-stone-300" />
+            <div className={`w-48 h-48 mx-auto bg-white rounded-2xl ${flatBorder} flex items-center justify-center mb-6 p-3`}>
+              <QRCode
+                value={invite?.url ?? ''}
+                size={168}
+                bgColor="#ffffff"
+                fgColor="#292524"
+                style={{ width: '100%', height: '100%' }}
+              />
             </div>
 
             <div className="flex gap-2 mb-4">

@@ -1,6 +1,8 @@
 import type {
   DeleteTaskHistoryInput,
   CreateTaskHistoryInput,
+  CreateNeguraiInput,
+  DeleteNeguraiInput,
   IFamilyRepository,
   UpsertTaskMasterInput,
 } from '../../repositories/IFamilyRepository.js'
@@ -8,6 +10,7 @@ import type {
   CognitoSub,
   DailySummary,
   FamilyID,
+  Negurai,
   TaskHistory,
   TaskID,
   TaskMaster,
@@ -75,5 +78,21 @@ export class MockFamilyRepository implements IFamilyRepository {
 
   async consumeInvite(_token: string, _cognitoSub: CognitoSub, _displayName: string): Promise<FamilyID> {
     return 'fam_mock'
+  }
+
+  neguraiList: Negurai[] = []
+  createNeguraiCalls: Array<[FamilyID, CognitoSub, CreateNeguraiInput]> = []
+  deleteNeguraiCalls: Array<[FamilyID, CognitoSub, DeleteNeguraiInput]> = []
+
+  async listNegurai(_familyId: FamilyID): Promise<Negurai[]> {
+    return this.neguraiList
+  }
+
+  async createNegurai(familyId: FamilyID, receiverSub: CognitoSub, input: CreateNeguraiInput): Promise<void> {
+    this.createNeguraiCalls.push([familyId, receiverSub, input])
+  }
+
+  async deleteNegurai(familyId: FamilyID, receiverSub: CognitoSub, input: DeleteNeguraiInput): Promise<void> {
+    this.deleteNeguraiCalls.push([familyId, receiverSub, input])
   }
 }

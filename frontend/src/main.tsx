@@ -7,6 +7,7 @@ import { AppProvider } from './context'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import History from './pages/History'
+import Negurai from './pages/Negurai'
 import Settings from './pages/Settings'
 import Invite from './pages/Invite'
 import Auth from './pages/Auth'
@@ -56,6 +57,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: 'history', element: <History /> },
+      { path: 'negurai', element: <Negurai /> },
       { path: 'settings', element: <Settings /> },
     ],
   },

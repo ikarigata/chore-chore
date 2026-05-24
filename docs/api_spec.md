@@ -39,7 +39,7 @@
     ```json
     {
       "users": [
-        { "cognitoSub": "...", "displayName": "パパ", "totalPoints": 120 }
+        { "cognitoSub": "...", "displayName": "パパ", "totalPoints": 120, "neguraiPoints": 20 }
       ],
       "taskMasters": [
         { "taskId": "...", "taskName": "お風呂掃除", "points": 10, "categoryId": "water" }
@@ -275,6 +275,65 @@ DynamoDBの `PutItem` は、データが存在しなければ「作成」、存�
     * **処理C（累積ポイントの減算）**:
         * PK: `FamilyID`、SK: `USER#{CognitoSub}`
         * `UpdateItem` で `ADD TotalPoints :points`（同じく `-points`）。家事完了と対称な3点同時減算で総計を整合させます。
+
+### 2.12. ねぎらい登録API ⚠️冪等性必須
+
+家事をより多く負担している側への感謝（金銭・物・行為など）を記録し、ねぎらった側にねぎらいポイントを付与します。
+
+- **エンドポイント**: `POST /negurai`
+- **記録者**: **ねぎらわれた側**（受け取った人）。ズル防止のため、ねぎらった本人は登録できません。
+- **リクエストボディ**:
+    ```json
+    { "neguraiId": "<フロントで発行したUUID>", "giverSub": "<ねぎらった側のCognitoSub>", "description": "コーヒーを買ってきてくれた", "points": 20 }
+    ```
+    * `neguraiId`: 冪等性担保のためフロントエンドで発行する UUID。リトライ時も再発行せず同じ UUID を使い回す。
+    * `giverSub === ctx.cognitoSub` の場合は 400 を返す（自己ねぎらい禁止）。
+* **レスポンス**: `200 { "message": "ねぎらいを記録しました" }`
+* **エラー**:
+    * `400` 必須フィールド欠落 / `points <= 0` / `giverSub` が自分自身
+    * `409` 同一 `neguraiId` で既に記録済み（冪等リトライの安全な弾き）
+* **DynamoDB操作**: `TransactWriteItems`
+    * **処理A（ねぎらい記録の作成）**: `PutItem` — PK: `FamilyID`、SK: `NEGURAI#{RFC3339Timestamp}#{NeguraiID}`、条件: `attribute_not_exists(DataSortKey)`
+    * **処理B（ねぎらいポイントの加算）**: `UpdateItem` — PK: `FamilyID`、SK: `USER#{GiverSub}`、`ADD NeguraiPoints :points`
+
+### 2.13. ねぎらい取り消しAPI
+
+- **エンドポイント**: `DELETE /negurai`
+- **目的**: 誤って登録したねぎらいを取り消し、加算されたねぎらいポイントを減算します。
+- **リクエストボディ**:
+    ```json
+    { "neguraiId": "<取り消すねぎらいのUUID>", "timestamp": "<ねぎらい記録のRFC3339時刻>", "points": 20, "giverSub": "<ねぎらった側のCognitoSub>" }
+    ```
+* **レスポンス**: `200 { "message": "ねぎらいの記録を取り消しました" }`
+* **エラー**:
+    * `400` 必須フィールド欠落 / `points <= 0`
+    * `404` 対象レコード未存在、または呼び出し元が記録者（`ReceiverSub`）でない
+* **DynamoDB操作**: `TransactWriteItems`
+    * **処理A（ねぎらい記録の削除）**: `DeleteItem` — 条件: `attribute_exists(DataSortKey) AND ReceiverSub = :receiverSub`（存在チェック兼・記録者本人のみ削除可）
+    * **処理B（ねぎらいポイントの減算）**: `UpdateItem` — `ADD NeguraiPoints :-points`
+
+### 2.14. ねぎらい一覧API
+
+- **エンドポイント**: `GET /negurai`
+- **目的**: 家族のねぎらい履歴を取得します。
+- **リクエストボディ**: なし
+- **レスポンス**:
+    ```json
+    {
+      "negurai": [
+        {
+          "neguraiId": "...",
+          "giverSub": "...",
+          "receiverSub": "...",
+          "description": "コーヒーを買ってきてくれた",
+          "points": 20,
+          "timestamp": "2026-05-24T10:00:00.000Z",
+          "expiresAt": 1779763200
+        }
+      ]
+    }
+    ```
+* **DynamoDB操作**: `Query` — SK: `BETWEEN 'NEGURAI#{3ヶ月前}' AND 'NEGURAI#~'`、`ScanIndexForward: false`（新しい順）
 
 ---
 

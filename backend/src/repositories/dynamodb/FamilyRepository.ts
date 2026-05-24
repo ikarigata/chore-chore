@@ -11,6 +11,8 @@ import { AppError } from '../../errors.js'
 import type {
   DeleteTaskHistoryInput,
   CreateTaskHistoryInput,
+  CreateNeguraiInput,
+  DeleteNeguraiInput,
   IFamilyRepository,
   UpsertTaskMasterInput,
 } from '../IFamilyRepository.js'
@@ -18,6 +20,7 @@ import type {
   CognitoSub,
   DailySummary,
   FamilyID,
+  Negurai,
   TaskHistory,
   TaskID,
   TaskMaster,
@@ -38,6 +41,23 @@ function parseUser(item: DynamoItem): User {
     cognitoSub: sk.slice('USER#'.length),
     displayName: item['DisplayName'] as string,
     totalPoints: (item['TotalPoints'] as number) ?? 0,
+    neguraiPoints: (item['NeguraiPoints'] as number) ?? 0,
+  }
+}
+
+function parseNegurai(item: DynamoItem): Negurai {
+  // SK: NEGURAI#{RFC3339Timestamp}#{NeguraiID}
+  const sk = item['DataSortKey'] as string
+  const withoutPrefix = sk.slice('NEGURAI#'.length)
+  const sep = withoutPrefix.indexOf('#')
+  return {
+    neguraiId: withoutPrefix.slice(sep + 1),
+    timestamp: withoutPrefix.slice(0, sep),
+    giverSub: item['GiverSub'] as string,
+    receiverSub: item['ReceiverSub'] as string,
+    description: item['Description'] as string,
+    points: item['Points'] as number,
+    expiresAt: item['ExpiresAt'] as number,
   }
 }
 
@@ -338,6 +358,125 @@ export class DynamoFamilyRepository implements IFamilyRepository {
         Item: { Token: token, FamilyID: familyId, ExpiresAt: expiresAt },
       }),
     )
+  }
+
+  async listNegurai(familyId: FamilyID): Promise<Negurai[]> {
+    const since = new Date()
+    since.setMonth(since.getMonth() - 3)
+    since.setHours(0, 0, 0, 0)
+
+    const items: DynamoItem[] = []
+    let lastKey: Record<string, unknown> | undefined
+
+    do {
+      const result = await this.client.send(
+        new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: 'FamilyID = :pk AND DataSortKey BETWEEN :start AND :end',
+          ExpressionAttributeValues: {
+            ':pk': familyId,
+            ':start': `NEGURAI#${since.toISOString()}`,
+            ':end': 'NEGURAI#~',
+          },
+          ScanIndexForward: false,
+          ExclusiveStartKey: lastKey,
+        }),
+      )
+      items.push(...((result.Items ?? []) as DynamoItem[]))
+      lastKey = result.LastEvaluatedKey as Record<string, unknown> | undefined
+    } while (lastKey)
+
+    return items.map((item) => parseNegurai(item))
+  }
+
+  async createNegurai(
+    familyId: FamilyID,
+    receiverSub: CognitoSub,
+    input: CreateNeguraiInput,
+  ): Promise<void> {
+    try {
+      await this.client.send(
+        new TransactWriteCommand({
+          TransactItems: [
+            {
+              Put: {
+                TableName: TABLE_NAME,
+                Item: {
+                  FamilyID: familyId,
+                  DataSortKey: `NEGURAI#${input.timestamp}#${input.neguraiId}`,
+                  GiverSub: input.giverSub,
+                  ReceiverSub: receiverSub,
+                  Description: input.description,
+                  Points: input.points,
+                  ExpiresAt: input.expiresAt,
+                },
+                // 同一 NeguraiID の二重加算を防ぐ
+                ConditionExpression: 'attribute_not_exists(DataSortKey)',
+              },
+            },
+            {
+              Update: {
+                TableName: TABLE_NAME,
+                Key: { FamilyID: familyId, DataSortKey: `USER#${input.giverSub}` },
+                UpdateExpression: 'ADD NeguraiPoints :points',
+                ExpressionAttributeValues: { ':points': input.points },
+              },
+            },
+          ],
+        }),
+      )
+    } catch (err) {
+      if (err instanceof TransactionCanceledException) {
+        const hasDuplicate = err.CancellationReasons?.some(
+          (r) => r.Code === 'ConditionalCheckFailed',
+        )
+        if (hasDuplicate) throw new AppError(409, 'このねぎらいは既に記録されています')
+      }
+      throw err
+    }
+  }
+
+  async deleteNegurai(
+    familyId: FamilyID,
+    receiverSub: CognitoSub,
+    input: DeleteNeguraiInput,
+  ): Promise<void> {
+    try {
+      await this.client.send(
+        new TransactWriteCommand({
+          TransactItems: [
+            {
+              Delete: {
+                TableName: TABLE_NAME,
+                Key: {
+                  FamilyID: familyId,
+                  DataSortKey: `NEGURAI#${input.timestamp}#${input.neguraiId}`,
+                },
+                // 存在チェック + 記録者本人のみ削除可能
+                ConditionExpression: 'attribute_exists(DataSortKey) AND ReceiverSub = :receiverSub',
+                ExpressionAttributeValues: { ':receiverSub': receiverSub },
+              },
+            },
+            {
+              Update: {
+                TableName: TABLE_NAME,
+                Key: { FamilyID: familyId, DataSortKey: `USER#${input.giverSub}` },
+                UpdateExpression: 'ADD NeguraiPoints :points',
+                ExpressionAttributeValues: { ':points': -input.points },
+              },
+            },
+          ],
+        }),
+      )
+    } catch (err) {
+      if (err instanceof TransactionCanceledException) {
+        const reasons = err.CancellationReasons ?? []
+        if (reasons[0]?.Code === 'ConditionalCheckFailed') {
+          throw new AppError(404, '対象のねぎらいが見つからないか、取り消す権限がありません')
+        }
+      }
+      throw err
+    }
   }
 
   async consumeInvite(token: string, cognitoSub: CognitoSub, displayName: string): Promise<FamilyID> {

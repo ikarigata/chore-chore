@@ -34,7 +34,8 @@
 - **SK形式**: `USER#{CognitoSub}`
 - **主要属性**:
   - `DisplayName` (String): ユーザーの表示名
-  - `TotalPoints` (Number): これまでの獲得総ポイント（★トランザクションで同期加算）
+  - `TotalPoints` (Number): 家事ポイントの累積合計（★トランザクションで同期加算）
+  - `NeguraiPoints` (Number): ねぎらいポイントの累積合計（★トランザクションで同期加算）。属性が存在しない既存レコードは 0 相当として扱う。
 
 ### ② 家事 (`TASK`)
 家族で定義した「家事の種類・獲得ポイント・カテゴリ」の設定データ（家事マスター）です。
@@ -59,6 +60,18 @@
   - `TaskID` (String): 実行した家事のID
   - `Points` (Number): 獲得したポイント（当時のポイントスナップショット）
   - `ExpiresAt` (Number): TTL用UNIXタイムスタンプ（例：1年後）
+
+### ⑤ ねぎらい (`NEGURAI`)
+「誰が・誰に・何をしてもらったか」を記録するログです。家事以外の行為（贈り物、食事、マッサージ等）で相手への感謝を表明した記録で、**ねぎらった側**がポイントを獲得します。記録するのは**ねぎらわれた側**（受け取った人）です。
+- **SK形式**: `NEGURAI#{RFC3339Timestamp}#{NeguraiID}`
+  - `RFC3339Timestamp`: サーバー受信時刻（バックデート不可）。
+  - `NeguraiID`: 冪等性担保のためフロントエンドで発行した UUID。
+- **主要属性**:
+  - `GiverSub` (String): ねぎらった側の CognitoSub（ポイント獲得者）
+  - `ReceiverSub` (String): ねぎらわれた側の CognitoSub（記録者）
+  - `Description` (String): 自由テキスト（何をしてもらったか）
+  - `Points` (Number): 付与ポイント数
+  - `ExpiresAt` (Number): TTL用UNIXタイムスタンプ（1年後）
 
 ---
 
@@ -85,6 +98,17 @@
   1. `DeleteItem`: `HISTORY#...` の削除
   2. `UpdateItem`: `DAILY#...` の更新 (`ADD DailyPoints :-points` ※マイナス値を渡して減算)
   3. `UpdateItem`: `USER#...` の更新 (`ADD TotalPoints :-points` ※マイナス値を渡して減算)
+
+### D. ねぎらいの記録（ねぎらいポイント加算） (`POST /negurai`)
+記録者（ねぎらわれた側）がねぎらった側のポイントを加算します。ポイントは家事ポイントと分離して `NeguraiPoints` に加算します。
+- **操作**: `TransactWriteItems` (以下の2つを完全同時に処理)
+  1. `PutItem`: `NEGURAI#...` の作成 (`attribute_not_exists(DataSortKey)` 条件で冪等性を担保)
+  2. `UpdateItem`: `USER#{GiverSub}` の更新 (`ADD NeguraiPoints :points`)
+
+### E. ねぎらいの取り消し（ねぎらいポイント減算） (`DELETE /negurai`)
+- **操作**: `TransactWriteItems` (以下の2つを完全同時に処理)
+  1. `DeleteItem`: `NEGURAI#...` の削除 (`attribute_exists(DataSortKey) AND ReceiverSub = :receiverSub` 条件 — 存在チェック兼・記録者本人のみ削除可能)
+  2. `UpdateItem`: `USER#{GiverSub}` の更新 (`ADD NeguraiPoints :-points` ※マイナス値を渡して減算)
 
 ---
 

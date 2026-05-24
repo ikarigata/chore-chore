@@ -4,6 +4,9 @@ import { familyInitHandler } from './handlers/familyInit.js'
 import { familyInviteHandler } from './handlers/familyInvite.js'
 import { familyJoinHandler } from './handlers/familyJoin.js'
 import { historiesHandler } from './handlers/histories.js'
+import { neguraiCreateHandler } from './handlers/neguraiCreate.js'
+import { neguraiDeleteHandler } from './handlers/neguraiDelete.js'
+import { neguraiListHandler } from './handlers/neguraiList.js'
 import { summaryDailyHandler } from './handlers/summaryDaily.js'
 import { summaryWeeklyHandler } from './handlers/summaryWeekly.js'
 import { taskDeleteHandler } from './handlers/taskDelete.js'
@@ -47,6 +50,15 @@ export async function route(
 
     case 'GET /histories':
       return historiesHandler(ctx, req, deps)
+
+    case 'GET /negurai':
+      return neguraiListHandler(ctx, req, deps)
+
+    case 'POST /negurai':
+      return neguraiCreateHandler(ctx, req, deps)
+
+    case 'DELETE /negurai':
+      return neguraiDeleteHandler(ctx, req, deps)
 
     case 'PUT /tasks':
       return taskUpsertHandler(ctx, req, deps)

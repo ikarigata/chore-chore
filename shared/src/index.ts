@@ -6,6 +6,7 @@ export const UserSchema = z.object({
   cognitoSub: z.string(),
   displayName: z.string(),
   totalPoints: z.number(),
+  neguraiPoints: z.number().optional(),
 });
 
 export const TaskMasterSchema = z.object({
@@ -30,10 +31,21 @@ export const TaskHistorySchema = z.object({
   expiresAt: z.number(),
 });
 
+export const NeguraiSchema = z.object({
+  neguraiId: z.string(),
+  giverSub: z.string(),
+  receiverSub: z.string(),
+  description: z.string(),
+  points: z.number(),
+  timestamp: z.string(),
+  expiresAt: z.number(),
+});
+
 export type User = z.infer<typeof UserSchema>;
 export type TaskMaster = z.infer<typeof TaskMasterSchema>;
 export type DailySummary = z.infer<typeof DailySummarySchema>;
 export type TaskHistory = z.infer<typeof TaskHistorySchema>;
+export type Negurai = z.infer<typeof NeguraiSchema>;
 
 // --- API Request/Response Schemas ---
 
@@ -76,6 +88,24 @@ export const TaskHistoryDeleteRequestSchema = z.object({
   points: z.number(),
 });
 
+export const NeguraiCreateRequestSchema = z.object({
+  neguraiId: z.string().uuid(),
+  giverSub: z.string().min(1),
+  description: z.string().min(1),
+  points: z.number().int().positive(),
+});
+
+export const NeguraiDeleteRequestSchema = z.object({
+  neguraiId: z.string().uuid(),
+  timestamp: z.string(),
+  points: z.number().int().positive(),
+  giverSub: z.string().min(1),
+});
+
+export const NeguraiListResponseSchema = z.object({
+  negurai: z.array(NeguraiSchema),
+});
+
 export const FamilyCreateRequestSchema = z.object({
   displayName: z.string().min(1),
 });
@@ -106,6 +136,9 @@ export type TaskHistoryListResponse = z.infer<typeof TaskHistoryListResponseSche
 export type TaskMasterUpsertRequest = z.infer<typeof TaskMasterUpsertRequestSchema>;
 export type TaskHistoryCreateRequest = z.infer<typeof TaskHistoryCreateRequestSchema>;
 export type TaskHistoryDeleteRequest = z.infer<typeof TaskHistoryDeleteRequestSchema>;
+export type NeguraiCreateRequest = z.infer<typeof NeguraiCreateRequestSchema>;
+export type NeguraiDeleteRequest = z.infer<typeof NeguraiDeleteRequestSchema>;
+export type NeguraiListResponse = z.infer<typeof NeguraiListResponseSchema>;
 export type FamilyCreateRequest = z.infer<typeof FamilyCreateRequestSchema>;
 export type FamilyJoinRequest = z.infer<typeof FamilyJoinRequestSchema>;
 export type FamilyCreateResponse = z.infer<typeof FamilyCreateResponseSchema>;

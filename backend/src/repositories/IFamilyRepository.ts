@@ -2,6 +2,8 @@ import type {
   CognitoSub,
   DailySummary,
   FamilyID,
+  Negurai,
+  NeguraiID,
   TaskExecutionID,
   TaskHistory,
   TaskID,
@@ -33,6 +35,22 @@ export interface UpsertTaskMasterInput {
   categoryId?: string
 }
 
+export interface CreateNeguraiInput {
+  neguraiId: NeguraiID
+  giverSub: CognitoSub
+  description: string
+  points: number
+  timestamp: string
+  expiresAt: number
+}
+
+export interface DeleteNeguraiInput {
+  neguraiId: NeguraiID
+  giverSub: CognitoSub
+  timestamp: string
+  points: number
+}
+
 export interface IFamilyRepository {
   listFamilyMembers(familyId: FamilyID): Promise<User[]>
   listTaskMasters(familyId: FamilyID): Promise<TaskMaster[]>
@@ -47,4 +65,7 @@ export interface IFamilyRepository {
   createFamily(familyId: FamilyID, cognitoSub: CognitoSub, displayName: string): Promise<void>
   createInvite(familyId: FamilyID, token: string, expiresAt: number): Promise<void>
   consumeInvite(token: string, cognitoSub: CognitoSub, displayName: string): Promise<FamilyID>
+  listNegurai(familyId: FamilyID): Promise<Negurai[]>
+  createNegurai(familyId: FamilyID, receiverSub: CognitoSub, input: CreateNeguraiInput): Promise<void>
+  deleteNegurai(familyId: FamilyID, receiverSub: CognitoSub, input: DeleteNeguraiInput): Promise<void>
 }
