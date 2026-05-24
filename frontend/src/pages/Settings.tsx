@@ -23,6 +23,7 @@ export default function Settings() {
   const [editTaskName, setEditTaskName] = useState('');
   const [editTaskPoints, setEditTaskPoints] = useState(10);
   const [editTaskCat, setEditTaskCat] = useState('cooking');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const handleUpdateTaskMaster = async (e: React.FormEvent, taskId: string) => {
     e.preventDefault();
@@ -78,6 +79,37 @@ export default function Settings() {
 
   return (
     <div className="p-4 space-y-6">
+      {/* 削除確認ダイアログ */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
+          <div className={`bg-white rounded-2xl ${flatBorder} shadow-[6px_6px_0px_#292524] p-6 w-full max-w-xs space-y-4`}>
+            <p className="font-black text-base text-center">本当に削除しますか？</p>
+            <p className="text-xs text-stone-500 text-center font-bold">
+              「{taskMasters.find(t => t.taskId === confirmDeleteId)?.taskName}」を削除します。この操作は取り消せません。
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className={`flex-1 py-2.5 rounded-xl font-bold text-sm bg-stone-100 ${flatBorder} ${bounceClass}`}
+                style={springStyle}
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={async () => {
+                  const id = confirmDeleteId;
+                  setConfirmDeleteId(null);
+                  await handleDeleteTaskMaster(id);
+                }}
+                className={`flex-1 py-2.5 rounded-xl font-bold text-sm bg-red-400 text-white ${flatBorder} ${bounceClass}`}
+                style={springStyle}
+              >
+                削除
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* 家族招待 */}
       <button
         onClick={onOpenQr}
@@ -202,7 +234,7 @@ export default function Settings() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-black text-sm">{task.points}pt</span>
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-2">
                           <button
                             onClick={() => {
                               setEditingTaskId(task.taskId);
@@ -215,7 +247,7 @@ export default function Settings() {
                             <Pencil className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteTaskMaster(task.taskId)}
+                            onClick={() => setConfirmDeleteId(task.taskId)}
                             disabled={deletingId === task.taskId}
                             className={`p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors ${flatBorder}`}
                           >

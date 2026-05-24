@@ -39,42 +39,65 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="h-36 relative flex items-end justify-between pt-4 border-t-2 border-stone-100">
-          <div className="absolute top-0 w-full border-b border-dashed border-stone-200"></div>
-          <div className="absolute top-1/2 w-full border-b border-dashed border-stone-200"></div>
+        <div className="border-t-2 border-stone-100 pt-3">
+          {/* チャート全体（Y軸ラベルは絶対配置でオーバーレイ） */}
+          <div className="relative">
+            {/* Y軸ラベル（絶対配置 — レイアウトに影響しない） */}
+            <div className="absolute left-0 top-0 h-24 z-20 pointer-events-none">
+              <span className="absolute top-0 left-0 -translate-y-1/2 text-[8px] font-bold text-stone-400 leading-none whitespace-nowrap">
+                {maxWeeklyPoints}pt
+              </span>
+              <span className="absolute top-1/2 left-0 -translate-y-1/2 text-[8px] font-bold text-stone-400 leading-none whitespace-nowrap">
+                {Math.round(maxWeeklyPoints / 2)}pt
+              </span>
+            </div>
 
-          {dates.map((date, i) => {
-            const isToday = i === 6;
-            const displayDate = new Date(date).getDate(); // 日にちだけ表示
-            return (
-              <div key={date} className="flex flex-col items-center gap-1 flex-1 z-10">
-                <div className="flex flex-col-reverse w-4 h-24 justify-start">
-                  {members.map(m => {
-                    const daily = weeklySummaries?.find(s => s.cognitoSub === m.cognitoSub && s.date === date)?.dailyPoints ?? 0;
-                    if (daily === 0) return null;
-                    return (
-                      <div
-                        key={m.cognitoSub}
-                        className={`w-full ${m.color} border-x-2 border-t-2 border-stone-800 transition-all duration-500 ease-out first:rounded-b-sm last:rounded-t-sm`}
-                        style={{ height: `${(daily / maxWeeklyPoints) * 100}%`, ...springStyle }}
-                      />
-                    );
-                  })}
-                  {members.every(m => (weeklySummaries?.find(s => s.cognitoSub === m.cognitoSub && s.date === date)?.dailyPoints ?? 0) === 0) && (
-                    <div className="w-full h-0" />
-                  )}
-                </div>
-                <span className={`text-[10px] font-bold ${isToday ? 'text-teal-600' : 'text-stone-400'}`}>
-                  {isToday ? '今日' : displayDate}
-                </span>
-                {!isToday && (
-                  <span className={`text-[9px] font-bold leading-none ${isToday ? 'text-teal-500' : 'text-stone-400'}`}>
-                    （{new Intl.DateTimeFormat('ja-JP', { weekday: 'narrow', timeZone: 'Asia/Tokyo' }).format(new Date(date))}）
-                  </span>
-                )}
+            {/* バーエリア（グリッド線はバー高さに正確に対応） */}
+            <div className="relative h-24">
+              <div className="absolute top-0 inset-x-0 border-b border-dashed border-stone-200 z-0" />
+              <div className="absolute top-1/2 inset-x-0 border-b border-dashed border-stone-200 z-0" />
+              <div className="flex items-end justify-between h-full relative z-10">
+                {dates.map(date => (
+                  <div key={date} className="w-4 h-full flex flex-col-reverse justify-start">
+                    {members.map(m => {
+                      const daily = weeklySummaries?.find(s => s.cognitoSub === m.cognitoSub && s.date === date)?.dailyPoints ?? 0;
+                      if (daily === 0) return null;
+                      return (
+                        <div
+                          key={m.cognitoSub}
+                          className={`w-full ${m.color} border-x-2 border-t-2 border-stone-800 transition-all duration-500 ease-out first:rounded-b-sm last:rounded-t-sm`}
+                          style={{ height: `${(daily / maxWeeklyPoints) * 100}%`, ...springStyle }}
+                        />
+                      );
+                    })}
+                    {members.every(m => (weeklySummaries?.find(s => s.cognitoSub === m.cognitoSub && s.date === date)?.dailyPoints ?? 0) === 0) && (
+                      <div className="w-full h-0" />
+                    )}
+                  </div>
+                ))}
               </div>
-            );
-          })}
+            </div>
+
+            {/* 日付ラベル（バーと同じ justify-between で位置を揃える） */}
+            <div className="flex justify-between mt-1">
+              {dates.map((date, i) => {
+                const isToday = i === 6;
+                const displayDate = new Date(date).getDate();
+                return (
+                  <div key={date} className="w-4 flex flex-col items-center">
+                    <span className={`text-[10px] font-bold ${isToday ? 'text-teal-600' : 'text-stone-400'}`}>
+                      {isToday ? '今日' : displayDate}
+                    </span>
+                    {!isToday && (
+                      <span className="text-[9px] font-bold leading-none text-stone-400">
+                        （{new Intl.DateTimeFormat('ja-JP', { weekday: 'narrow', timeZone: 'Asia/Tokyo' }).format(new Date(date))}）
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 

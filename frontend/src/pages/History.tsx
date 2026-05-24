@@ -85,12 +85,11 @@ export default function History() {
               <div className="space-y-3 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-stone-300 before:to-transparent">
                 {items.map(item => {
                   const categoryId = taskMasters.find(t => t.taskId === item.taskId)?.categoryId;
-                  const cat = CATEGORIES.find(c => c.id === categoryId) ?? CATEGORIES.find(c => c.id === 'other');
+                  const cat = (CATEGORIES.find(c => c.id === categoryId) ?? CATEGORIES.find(c => c.id === 'other'))!;
                   const member = members.find(m => m.cognitoSub === item.cognitoSub);
                   const isMe = item.cognitoSub === mySub;
                   const ts = new Date(item.timestamp);
                   const isProcessing = processingId === item.taskExecutionId;
-                  // JST の時刻表示
                   const timeLabel = new Intl.DateTimeFormat('ja-JP', {
                     timeZone: TZ,
                     hour: '2-digit',
@@ -98,35 +97,46 @@ export default function History() {
                     hour12: false,
                   }).format(ts);
                   return (
-                    <div key={item.taskExecutionId} className="relative flex items-center justify-between group animate-in fade-in slide-in-from-bottom-4 duration-300">
-                      <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 border-white ${member?.color ?? 'bg-stone-300'} shadow shrink-0 z-10`}>
-                        <cat.icon className="w-5 h-5 text-stone-800" />
+                    <div key={item.taskExecutionId} className="relative flex items-start gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                      {/* カテゴリアイコン（カテゴリ背景色で種類を一目で識別） */}
+                      <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 border-stone-800 ${cat.color} shadow shrink-0 z-10`}>
+                        <cat.icon className="w-5 h-5 text-stone-700" />
                       </div>
 
-                      <div className={`w-[calc(100%-3.5rem)] p-3 rounded-2xl bg-white ${flatBorder} shadow-[2px_2px_0px_#292524]`}>
-                        <div className="flex justify-between items-start mb-1">
-                          <span className="font-bold text-sm">
+                      {/* カード */}
+                      <div className={`flex-1 p-3 rounded-2xl bg-white ${flatBorder} shadow-[2px_2px_0px_#292524]`}>
+                        {/* 上段: 家事名 + ポイントバッジ */}
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="font-bold text-sm leading-snug flex-1">
                             {taskMasters.find(t => t.taskId === item.taskId)?.taskName ?? item.taskId}
                           </span>
-                          <span className="text-xs font-black text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">+{item.points}</span>
+                          <span className="text-xs font-black text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 shrink-0">
+                            +{item.points}pt
+                          </span>
                         </div>
-                        <div className="text-[10px] font-bold text-stone-400 flex items-center justify-between">
-                          <span>{isMe ? 'あなた' : (member?.displayName ?? '不明')} が完了</span>
-                          <div className="flex items-center gap-2">
-                            <span>{timeLabel}</span>
-                            {isMe && (
-                              <button
-                                onClick={() => handleCancel(item)}
-                                disabled={processingId !== null}
-                                title="取り消す"
-                                className={`p-1 rounded-lg text-stone-300 hover:text-red-400 hover:bg-red-50 transition-colors disabled:opacity-40 ${flatBorder}`}
-                              >
-                                {isProcessing
-                                  ? <Loader2 className="w-3 h-3 animate-spin" />
-                                  : <Undo2 className="w-3 h-3" />}
-                              </button>
-                            )}
+                        {/* 下段: メンバー · 時刻 ｜ 取り消し */}
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-stone-100">
+                          {/* 左: メンバーと時刻をひとまとめ */}
+                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-stone-500">
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${member?.color ?? 'bg-stone-300'}`} />
+                            <span>{isMe ? 'あなた' : (member?.displayName ?? '不明')}</span>
+                            <span className="text-stone-300">·</span>
+                            <span className="text-stone-400">{timeLabel}</span>
                           </div>
+                          {/* 右: 取り消しボタン（自分の実績のみ） */}
+                          {isMe && (
+                            <button
+                              onClick={() => handleCancel(item)}
+                              disabled={processingId !== null}
+                              title="取り消す"
+                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-black text-red-500 bg-red-50 border border-red-200 hover:bg-red-100 active:bg-red-200 transition-colors disabled:opacity-40"
+                            >
+                              {isProcessing
+                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                : <Undo2 className="w-3 h-3" />}
+                              <span>取り消し</span>
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
