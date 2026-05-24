@@ -61,4 +61,56 @@ describe('taskExecuteHandler', () => {
       taskExecuteHandler(CTX, makeReq({ taskId: 'task-1', taskExecutionId: 'dup' }), { familyRepo: repo }),
     ).rejects.toThrow(new AppError(409, 'この家事完了は既に記録されています'))
   })
+
+  it('timestamp が指定された場合その値を使って HISTORY と DAILY を組み立てる', async () => {
+    // JST 2026-05-22 21:00 = UTC 2026-05-22 12:00
+    const backdatedIso = '2026-05-22T12:00:00.000Z'
+    const res = await taskExecuteHandler(
+      CTX,
+      makeReq({ taskId: 'task-1', taskExecutionId: 'exec-back', timestamp: backdatedIso }),
+      { familyRepo: repo },
+    )
+
+    expect(res.statusCode).toBe(200)
+    const [, , input] = repo.createTaskHistoryCalls[0]!
+    expect(input.timestamp).toBe(backdatedIso)
+    expect(input.dailyDate).toBe('2026-05-22')
+  })
+
+  it('timestamp を省略した場合は現在時刻を使う', async () => {
+    const before = Date.now()
+    await taskExecuteHandler(
+      CTX,
+      makeReq({ taskId: 'task-1', taskExecutionId: 'exec-now' }),
+      { familyRepo: repo },
+    )
+    const after = Date.now()
+
+    const [, , input] = repo.createTaskHistoryCalls[0]!
+    const ts = new Date(input.timestamp).getTime()
+    expect(ts).toBeGreaterThanOrEqual(before)
+    expect(ts).toBeLessThanOrEqual(after)
+  })
+
+  it('未来日の timestamp は 400 を投げる', async () => {
+    const futureIso = new Date(Date.now() + 60 * 1000).toISOString()
+    await expect(
+      taskExecuteHandler(
+        CTX,
+        makeReq({ taskId: 'task-1', taskExecutionId: 'exec-future', timestamp: futureIso }),
+        { familyRepo: repo },
+      ),
+    ).rejects.toThrow(new AppError(400, '未来日は指定できません'))
+  })
+
+  it('8日以上前の timestamp は 400 を投げる', async () => {
+    const eightDaysAgoIso = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString()
+    await expect(
+      taskExecuteHandler(
+        CTX,
+        makeReq({ taskId: 'task-1', taskExecutionId: 'exec-old', timestamp: eightDaysAgoIso }),
+        { familyRepo: repo },
+      ),
+    ).rejects.toThrow(new AppError(400, '7日より前の日付は指定できません'))
+  })
 })

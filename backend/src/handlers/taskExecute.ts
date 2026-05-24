@@ -18,7 +18,7 @@ export async function taskExecuteHandler(
     throw new AppError(400, `入力形式が正しくありません: ${result.error.message}`)
   }
 
-  const { taskId, taskExecutionId } = result.data
+  const { taskId, taskExecutionId, timestamp } = result.data
 
   const task = await deps.familyRepo.getTaskMaster(ctx.familyId, taskId)
   if (!task) {
@@ -26,13 +26,26 @@ export async function taskExecuteHandler(
   }
 
   const now = new Date()
+  const eventDate = timestamp ? new Date(timestamp) : now
+
+  if (timestamp) {
+    if (eventDate.getTime() > now.getTime()) {
+      throw new AppError(400, '未来日は指定できません')
+    }
+    // 7日より前 = 8日以上前を拒否（今日含む直近8日のみ許容）
+    const sevenDaysAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000
+    if (eventDate.getTime() < sevenDaysAgo) {
+      throw new AppError(400, '7日より前の日付は指定できません')
+    }
+  }
+
   await deps.familyRepo.createTaskHistory(ctx.familyId, ctx.cognitoSub, {
     taskExecutionId,
     taskId,
-    timestamp: now.toISOString(),
+    timestamp: eventDate.toISOString(),
     points: task.points,
     expiresAt: historyExpiresAt(),
-    dailyDate: getJSTDateString(now),
+    dailyDate: getJSTDateString(eventDate),
     dailyExpiresAt: dailySummaryExpiresAt(),
   })
 

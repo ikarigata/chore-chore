@@ -67,6 +67,7 @@ export const TaskMasterUpsertRequestSchema = z.object({
 export const TaskHistoryCreateRequestSchema = z.object({
   taskId: z.string(),
   taskExecutionId: z.string(),
+  timestamp: z.string().datetime().optional(),
 });
 
 export const TaskHistoryDeleteRequestSchema = z.object({

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ScrollText, Undo2, Loader2 } from 'lucide-react';
+import { ScrollText, Undo2, Loader2, Calendar } from 'lucide-react';
 import { useApp } from '../context';
 import { CATEGORIES } from '../constants';
 import { flatBorder } from '../styles';
+import DateChipSheet from '../components/DateChipSheet';
 import type { TaskHistory } from '../types';
 
 const TZ = 'Asia/Tokyo';
@@ -38,15 +39,27 @@ function groupByDate(histories: TaskHistory[]): { dateKey: string; items: TaskHi
 }
 
 export default function History() {
-  const { taskHistories, members, taskMasters, mySub, deleteTaskHistory, processingId } = useApp();
-  const [cancelError, setCancelError] = useState('');
+  const { taskHistories, members, taskMasters, mySub, deleteTaskHistory, updateTaskHistoryDate, processingId } = useApp();
+  const [actionError, setActionError] = useState('');
+  const [editing, setEditing] = useState<TaskHistory | null>(null);
 
   const handleCancel = async (item: TaskHistory) => {
-    setCancelError('');
+    setActionError('');
     try {
       await deleteTaskHistory(item);
     } catch (err) {
-      setCancelError((err as Error).message ?? '取り消しに失敗しました');
+      setActionError((err as Error).message ?? '取り消しに失敗しました');
+    }
+  };
+
+  const handleEditDate = async (newDateKey: string) => {
+    if (!editing) return;
+    const target = editing;
+    setActionError('');
+    try {
+      await updateTaskHistoryDate(target, newDateKey);
+    } catch (err) {
+      setActionError((err as Error).message ?? '日付変更に失敗しました');
     }
   };
 
@@ -59,9 +72,9 @@ export default function History() {
         みんなの履歴
       </h2>
 
-      {cancelError && (
+      {actionError && (
         <p className="text-sm font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-          {cancelError}
+          {actionError}
         </p>
       )}
 
@@ -123,19 +136,28 @@ export default function History() {
                             <span className="text-stone-300">·</span>
                             <span className="text-stone-400">{timeLabel}</span>
                           </div>
-                          {/* 右: 取り消しボタン（自分の実績のみ） */}
+                          {/* 右: 日付変更・取り消しボタン（自分の実績のみ） */}
                           {isMe && (
-                            <button
-                              onClick={() => handleCancel(item)}
-                              disabled={processingId !== null}
-                              title="取り消す"
-                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-black text-red-500 bg-red-50 border border-red-200 hover:bg-red-100 active:bg-red-200 transition-colors disabled:opacity-40"
-                            >
-                              {isProcessing
-                                ? <Loader2 className="w-3 h-3 animate-spin" />
-                                : <Undo2 className="w-3 h-3" />}
-                              <span>取り消し</span>
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => setEditing(item)}
+                                disabled={processingId !== null}
+                                title="日付を変更"
+                                className={`p-1.5 rounded-lg text-stone-400 hover:text-teal-600 hover:bg-teal-50 transition-colors disabled:opacity-40 ${flatBorder}`}
+                              >
+                                <Calendar className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleCancel(item)}
+                                disabled={processingId !== null}
+                                title="取り消す"
+                                className={`p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40 ${flatBorder}`}
+                              >
+                                {isProcessing
+                                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                                  : <Undo2 className="w-4 h-4" />}
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -146,6 +168,15 @@ export default function History() {
             </div>
           ))}
         </div>
+      )}
+
+      {editing && (
+        <DateChipSheet
+          value={toJstDateKey(editing.timestamp)}
+          onSelect={handleEditDate}
+          onClose={() => setEditing(null)}
+          title="実績日を変更"
+        />
       )}
     </div>
   );

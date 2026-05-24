@@ -1,13 +1,28 @@
 import { useState } from 'react';
-import { Check, ArrowLeft, Flame, Loader2 } from 'lucide-react';
+import { Check, ArrowLeft, Flame, Loader2, Calendar, ChevronDown } from 'lucide-react';
 import { useApp } from '../context';
 import { CATEGORIES } from '../constants';
 import UserScore from '../components/UserScore';
+import DateChipSheet from '../components/DateChipSheet';
+import { getJSTDateString } from '../lib/time';
 import { springStyle, bounceClass, flatBorder } from '../styles';
+
+const TZ = 'Asia/Tokyo';
+
+function dateBadgeLabel(dateKey: string): string {
+  const todayKey = getJSTDateString(new Date());
+  const yesterdayKey = getJSTDateString(new Date(Date.now() - 86_400_000));
+  if (dateKey === todayKey) return '今日';
+  if (dateKey === yesterdayKey) return '昨日';
+  const d = new Date(`${dateKey}T00:00:00+09:00`);
+  return new Intl.DateTimeFormat('ja-JP', { timeZone: TZ, month: 'numeric', day: 'numeric' }).format(d);
+}
 
 export default function Home() {
   const { members, taskMasters, createTaskHistory, processingId, todaySummaries, weeklySummaries } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedDateKey, setSelectedDateKey] = useState<string>(() => getJSTDateString(new Date()));
+  const [showDateSheet, setShowDateSheet] = useState(false);
 
   // 過去7日分の日付配列（古い順）
   const dates = Array.from({ length: 7 }, (_, i) => {
@@ -138,6 +153,16 @@ export default function Home() {
               <h2 className="text-lg font-black">
                 {CATEGORIES.find(c => c.id === selectedCategory)?.name}の家事
               </h2>
+              <button
+                onClick={() => setShowDateSheet(true)}
+                aria-label="実績日を選ぶ"
+                className={`ml-auto flex items-center gap-1 px-3 py-1.5 rounded-full bg-white ${flatBorder} ${bounceClass} text-xs font-black shadow-[2px_2px_0px_#292524]`}
+                style={springStyle}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>{dateBadgeLabel(selectedDateKey)}</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
             </div>
 
             {taskMasters.filter(t => t.categoryId === selectedCategory).map(task => (
@@ -149,7 +174,7 @@ export default function Home() {
                   </div>
                 </div>
                 <button
-                  onClick={() => createTaskHistory(task)}
+                  onClick={() => createTaskHistory(task, { dateKey: selectedDateKey })}
                   disabled={processingId !== null}
                   className={`bg-teal-200 px-4 py-2 rounded-full font-bold ${flatBorder} flex items-center gap-1 transition-all ${processingId === task.taskId ? 'opacity-80 scale-95' : bounceClass}`}
                   style={springStyle}
@@ -174,6 +199,15 @@ export default function Home() {
           </div>
         )}
       </section>
+
+      {showDateSheet && (
+        <DateChipSheet
+          value={selectedDateKey}
+          onSelect={setSelectedDateKey}
+          onClose={() => setShowDateSheet(false)}
+          title="実績日を選ぶ"
+        />
+      )}
     </div>
   );
 }

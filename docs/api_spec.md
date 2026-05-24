@@ -60,11 +60,14 @@
 * **目的**: ユーザーが家事を完了したことを **家事実績** として記録し、ポイントを加算します。
 * **リクエストボディ**:
     ```json
-    { "taskId": "<家事 UUID>", "taskExecutionId": "<フロントで発行した家事実績 UUID>" }
+    { "taskId": "<家事 UUID>", "taskExecutionId": "<フロントで発行した家事実績 UUID>", "timestamp": "<optional: RFC3339>" }
     ```
+    * `timestamp` (optional, RFC3339): バックデート登録および §2.11 と組み合わせた家事実績の日付編集に使用する。省略時はサーバー受信時刻を採用。
+    * 受け付ける範囲は **今日〜7日前** のみ。未来日、または現在時刻から 7×24h を超えて過去の値はバリデーションエラー（400）になる。
+    * `dailyDate`（DAILY サマリ SK の日付部分）は常に `timestamp` を `Asia/Tokyo` で日付化した値から導出する。
 * **レスポンス**: `200 { "message": "家事を記録しました" }`
 * **エラー**:
-    * `400` `taskId` または `taskExecutionId` が欠落
+    * `400` `taskId` または `taskExecutionId` が欠落、もしくは `timestamp` が未来日 / 8日以上前
     * `404` 指定された `taskId` の家事が存在しない
     * `409` 同一 `taskExecutionId` で既に記録済み（冪等リトライの安全な弾き）
 * **DynamoDB操作**: TransactWriteItems。**3つを完全同時に書き込みます**（1つでも失敗すれば全件ロールバック）。

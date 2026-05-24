@@ -12,6 +12,7 @@ import {
 } from '@iezi/shared';
 import type { User, TaskMaster, TaskHistory, DailySummary } from './types';
 import { apiGet, apiPost, apiPut, apiDelete } from './lib/api';
+import { dateKeyToTimestamp, getJSTDateString } from './lib/time';
 
 const MEMBER_COLORS = ['bg-yellow-300', 'bg-orange-300', 'bg-teal-300', 'bg-purple-300'];
 
@@ -41,8 +42,9 @@ interface AppContextType {
   weeklySummaries: DailySummary[];
   upsertTaskMaster: (task: TaskMaster) => Promise<void>;
   deleteTaskMaster: (taskId: string) => Promise<void>;
-  createTaskHistory: (task: TaskMaster) => Promise<void>;
+  createTaskHistory: (task: TaskMaster, opts?: { dateKey?: string }) => Promise<void>;
   deleteTaskHistory: (item: TaskHistory) => Promise<void>;
+  updateTaskHistoryDate: (item: TaskHistory, newDateKey: string) => Promise<void>;
   processingId: string | null;
   initialized: boolean;
   initError: string | null;
@@ -115,13 +117,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTaskMasters(prev => prev.filter(t => t.taskId !== taskId));
   };
 
-  const createTaskHistory = async (task: TaskMaster) => {
+  const createTaskHistory = async (task: TaskMaster, opts?: { dateKey?: string }) => {
     if (processingId || !mySub) return;
     const taskExecutionId = crypto.randomUUID();
+    // 今日選択時は timestamp を送らずバックエンドの now に任せる
+    const todayKey = getJSTDateString(new Date());
+    const body: { taskId: string; taskExecutionId: string; timestamp?: string } = {
+      taskId: task.taskId,
+      taskExecutionId,
+    };
+    if (opts?.dateKey && opts.dateKey !== todayKey) {
+      body.timestamp = dateKeyToTimestamp(opts.dateKey);
+    }
 
     setProcessingId(task.taskId);
     try {
-      await apiPost('/tasks/execute', { taskId: task.taskId, taskExecutionId });
+      await apiPost('/tasks/execute', body);
       await refreshAllData();
     } catch (err) {
       console.error('家事の実行に失敗しました', err);
@@ -150,6 +161,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // 家事実績の日付編集は spec の鉄則どおり「削除→再登録（新 UUID）」の2段で行う
+  const updateTaskHistoryDate = async (item: TaskHistory, newDateKey: string) => {
+    if (processingId || !mySub) return;
+
+    setProcessingId(item.taskExecutionId);
+    try {
+      await apiDelete('/tasks/execute', {
+        taskExecutionId: item.taskExecutionId,
+        timestamp: item.timestamp,
+        points: item.points,
+      });
+      const newExecutionId = crypto.randomUUID();
+      const timestamp = dateKeyToTimestamp(newDateKey);
+      try {
+        await apiPost('/tasks/execute', {
+          taskId: item.taskId,
+          taskExecutionId: newExecutionId,
+          timestamp,
+        });
+      } catch (createErr) {
+        // delete は成功したが create が失敗 → 実状態を反映するため再取得してからユーザーに通知
+        await refreshAllData().catch(() => {});
+        throw createErr;
+      }
+      await refreshAllData();
+    } catch (err) {
+      console.error('家事の日付変更に失敗しました', err);
+      throw err;
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       mySub,
@@ -162,6 +206,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       deleteTaskMaster,
       createTaskHistory,
       deleteTaskHistory,
+      updateTaskHistoryDate,
       processingId,
       initialized,
       initError
