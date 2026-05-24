@@ -4,7 +4,16 @@ import animate from 'tailwindcss-animate';
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        brand: {
+          yellow: '#e1b425',
+          rose:   '#e09c91',
+          teal:   '#0ca5aa',
+          green:  '#167000',
+        },
+      },
+    },
   },
   plugins: [animate],
 };

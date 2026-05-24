@@ -79,7 +79,7 @@ export default function Auth() {
     <div className="min-h-screen bg-amber-50 flex flex-col items-center justify-center p-6">
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-black flex items-center gap-2 justify-center">
-          <Sparkles className="w-7 h-7 text-yellow-500" />
+          <Sparkles className="w-7 h-7 text-brand-yellow" />
           iezi
         </h1>
         <p className="text-sm font-bold text-stone-500 mt-1">家族の家事ポイント管理アプリ</p>
@@ -98,14 +98,14 @@ export default function Auth() {
                 placeholder="確認コード"
                 value={code}
                 onChange={e => setCode(e.target.value)}
-                className={`w-full p-3 rounded-xl bg-stone-50 ${flatBorder} font-bold text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-teal-400`}
+                className={`w-full p-3 rounded-xl bg-stone-50 ${flatBorder} font-bold text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-teal`}
                 inputMode="numeric"
               />
               {error && <p className="text-red-500 text-sm font-bold text-center">{error}</p>}
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full bg-teal-400 py-3 rounded-xl font-black text-lg ${flatBorder} flex items-center justify-center gap-2 ${bounceClass}`}
+                className={`w-full bg-brand-teal text-white py-3 rounded-xl font-black text-lg ${flatBorder} flex items-center justify-center gap-2 ${bounceClass}`}
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : '確認する'}
               </button>
@@ -138,20 +138,20 @@ export default function Auth() {
                 placeholder="メールアドレス"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className={`w-full p-3 rounded-xl bg-stone-50 ${flatBorder} font-bold focus:outline-none focus:ring-2 focus:ring-teal-400`}
+                className={`w-full p-3 rounded-xl bg-stone-50 ${flatBorder} font-bold focus:outline-none focus:ring-2 focus:ring-brand-teal`}
               />
               <input
                 type="password"
                 placeholder="パスワード（8文字以上、数字を含む）"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className={`w-full p-3 rounded-xl bg-stone-50 ${flatBorder} font-bold focus:outline-none focus:ring-2 focus:ring-teal-400`}
+                className={`w-full p-3 rounded-xl bg-stone-50 ${flatBorder} font-bold focus:outline-none focus:ring-2 focus:ring-brand-teal`}
               />
               {error && <p className="text-red-500 text-sm font-bold">{error}</p>}
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full bg-teal-400 py-3 rounded-xl font-black text-lg ${flatBorder} flex items-center justify-center gap-2 ${bounceClass}`}
+                className={`w-full bg-brand-teal text-white py-3 rounded-xl font-black text-lg ${flatBorder} flex items-center justify-center gap-2 ${bounceClass}`}
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : tab === 'signin' ? 'ログイン' : '登録する'}
               </button>

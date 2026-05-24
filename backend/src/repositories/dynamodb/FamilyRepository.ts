@@ -145,15 +145,36 @@ export class DynamoFamilyRepository implements IFamilyRepository {
   }
 
   async listTaskHistories(familyId: FamilyID): Promise<TaskHistory[]> {
-    const result = await this.client.send(
-      new QueryCommand({
-        TableName: TABLE_NAME,
-        KeyConditionExpression: 'FamilyID = :pk AND begins_with(DataSortKey, :prefix)',
-        ExpressionAttributeValues: { ':pk': familyId, ':prefix': 'HISTORY#' },
-        ScanIndexForward: false,
-      }),
-    )
-    return (result.Items ?? []).map((item) => parseTaskHistory(item as DynamoItem))
+    // 直近3ヶ月分のみ取得
+    // SK 形式: HISTORY#{RFC3339Timestamp}#{CognitoSub}#{TaskExecutionID}
+    // 終端の `~` (0x7E) はタイムスタンプ・UUID に含まれる文字より大きいため、
+    // HISTORY# で始まる全レコードの上限として機能する（getWeeklySummaries と同じ手法）
+    const since = new Date()
+    since.setMonth(since.getMonth() - 3)
+    since.setHours(0, 0, 0, 0)
+
+    const items: DynamoItem[] = []
+    let lastKey: Record<string, unknown> | undefined
+
+    do {
+      const result = await this.client.send(
+        new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: 'FamilyID = :pk AND DataSortKey BETWEEN :start AND :end',
+          ExpressionAttributeValues: {
+            ':pk': familyId,
+            ':start': `HISTORY#${since.toISOString()}`,
+            ':end': 'HISTORY#~',
+          },
+          ScanIndexForward: false,
+          ExclusiveStartKey: lastKey,
+        }),
+      )
+      items.push(...((result.Items ?? []) as DynamoItem[]))
+      lastKey = result.LastEvaluatedKey as Record<string, unknown> | undefined
+    } while (lastKey)
+
+    return items.map((item) => parseTaskHistory(item))
   }
 
   async createTaskHistory(

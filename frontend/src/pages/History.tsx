@@ -123,7 +123,7 @@ export default function History() {
                           <span className="font-bold text-sm leading-snug flex-1">
                             {taskMasters.find(t => t.taskId === item.taskId)?.taskName ?? item.taskId}
                           </span>
-                          <span className="text-xs font-black text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 shrink-0">
+                          <span className="text-xs font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-full border border-brand-teal/30 shrink-0">
                             +{item.points}pt
                           </span>
                         </div>
@@ -143,7 +143,7 @@ export default function History() {
                                 onClick={() => setEditing(item)}
                                 disabled={processingId !== null}
                                 title="日付を変更"
-                                className={`p-1.5 rounded-lg text-stone-400 hover:text-teal-600 hover:bg-teal-50 transition-colors disabled:opacity-40 ${flatBorder}`}
+                                className={`p-1.5 rounded-lg text-stone-400 hover:text-brand-teal hover:bg-brand-teal/10 transition-colors disabled:opacity-40 ${flatBorder}`}
                               >
                                 <Calendar className="w-4 h-4" />
                               </button>

@@ -74,7 +74,7 @@ export default function PointInput({
         type="button"
         onClick={handleIncrement}
         disabled={value >= max}
-        className={`w-12 h-12 flex items-center justify-center bg-yellow-400 ${flatBorder} rounded-full ${bounceClass} disabled:opacity-50 disabled:active:scale-100 shadow-[2px_2px_0px_#292524] hover:bg-yellow-300`}
+        className={`w-12 h-12 flex items-center justify-center bg-brand-yellow ${flatBorder} rounded-full ${bounceClass} disabled:opacity-50 disabled:active:scale-100 shadow-[2px_2px_0px_#292524] hover:bg-brand-yellow/80`}
         style={springStyle}
         aria-label="数値を増やす"
       >

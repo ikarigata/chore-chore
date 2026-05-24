@@ -45,13 +45,14 @@ export default function Home() {
     <div className="p-4 space-y-6">
       {/* ダッシュボード */}
       <section className={`bg-white rounded-2xl p-4 ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
-        <div className="flex justify-between items-end mb-4">
-          <div className="flex gap-4">
-            {members.map(m => {
-              const daily = todaySummaries.find(s => s.cognitoSub === m.cognitoSub)?.dailyPoints ?? 0;
-              return <UserScore key={m.cognitoSub} user={m} dailyPoints={daily} />;
-            })}
-          </div>
+        <div className="flex gap-2 w-full mb-4">
+          {members.map(m => {
+            const daily = todaySummaries.find(s => s.cognitoSub === m.cognitoSub)?.dailyPoints ?? 0;
+            const weekly = dates.reduce((sum, date) =>
+              sum + (weeklySummaries.find(s => s.cognitoSub === m.cognitoSub && s.date === date)?.dailyPoints ?? 0)
+            , 0);
+            return <UserScore key={m.cognitoSub} user={m} dailyPoints={daily} weeklyPoints={weekly} />;
+          })}
         </div>
 
         <div className="border-t-2 border-stone-100 pt-3">
@@ -100,7 +101,7 @@ export default function Home() {
                 const displayDate = new Date(date).getDate();
                 return (
                   <div key={date} className="w-4 flex flex-col items-center">
-                    <span className={`text-[10px] font-bold ${isToday ? 'text-teal-600' : 'text-stone-400'}`}>
+                    <span className={`text-[10px] font-bold ${isToday ? 'text-brand-teal' : 'text-stone-400'}`}>
                       {isToday ? '今日' : displayDate}
                     </span>
                     {!isToday && (
@@ -121,7 +122,7 @@ export default function Home() {
         {!selectedCategory ? (
           <>
             <h2 className="text-lg font-black mb-3 flex items-center gap-2">
-              <Check className="w-5 h-5 text-teal-500" />
+              <Check className="w-5 h-5 text-brand-teal" />
               家事を記録する
             </h2>
             <div className="grid grid-cols-3 gap-3">
@@ -169,14 +170,14 @@ export default function Home() {
               <div key={task.taskId} className={`bg-white p-3 rounded-2xl ${flatBorder} flex items-center justify-between shadow-[2px_2px_0px_#292524]`}>
                 <div>
                   <div className="font-bold">{task.taskName}</div>
-                  <div className="text-sm font-black text-yellow-600 flex items-center gap-1">
+                  <div className="text-sm font-black text-brand-yellow flex items-center gap-1">
                     <Flame className="w-4 h-4" /> {task.points} pt
                   </div>
                 </div>
                 <button
                   onClick={() => createTaskHistory(task, { dateKey: selectedDateKey })}
                   disabled={processingId !== null}
-                  className={`bg-teal-200 px-4 py-2 rounded-full font-bold ${flatBorder} flex items-center gap-1 transition-all ${processingId === task.taskId ? 'opacity-80 scale-95' : bounceClass}`}
+                  className={`bg-brand-teal text-white px-4 py-2 rounded-full font-bold ${flatBorder} flex items-center gap-1 transition-all ${processingId === task.taskId ? 'opacity-80 scale-95' : bounceClass}`}
                   style={springStyle}
                 >
                   {processingId === task.taskId ? (

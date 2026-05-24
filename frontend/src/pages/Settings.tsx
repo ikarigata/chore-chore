@@ -117,7 +117,7 @@ export default function Settings() {
         style={springStyle}
       >
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-full bg-teal-100 ${flatBorder} flex items-center justify-center`}>
+          <div className={`w-10 h-10 rounded-full bg-brand-teal/25 ${flatBorder} flex items-center justify-center`}>
             <QrCode className="w-5 h-5 text-stone-800" />
           </div>
           <div className="text-left">
@@ -129,7 +129,7 @@ export default function Settings() {
       </button>
 
       {/* 新規家事登録 */}
-      <section className={`bg-yellow-100/50 p-4 rounded-2xl ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
+      <section className={`bg-brand-yellow/15 p-4 rounded-2xl ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
         <h2 className="text-base font-black mb-3">新しい家事を作る</h2>
         <form onSubmit={handleUpsertTaskMaster} className="space-y-3">
           <input
@@ -137,12 +137,12 @@ export default function Settings() {
             placeholder="家事の名前"
             value={newTaskName}
             onChange={e => setNewTaskName(e.target.value)}
-            className={`w-full p-3 rounded-xl bg-white ${flatBorder} font-bold placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+            className={`w-full p-3 rounded-xl bg-white ${flatBorder} font-bold placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-yellow`}
           />
           <select
             value={newTaskCat}
             onChange={e => setNewTaskCat(e.target.value)}
-            className={`w-full p-3 rounded-xl bg-white ${flatBorder} font-bold focus:outline-none focus:ring-2 focus:ring-yellow-400 appearance-none`}
+            className={`w-full p-3 rounded-xl bg-white ${flatBorder} font-bold focus:outline-none focus:ring-2 focus:ring-brand-yellow appearance-none`}
           >
             {CATEGORIES.map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
@@ -155,7 +155,7 @@ export default function Settings() {
           <button
             type="submit"
             disabled={submitting}
-            className={`w-full bg-yellow-300 py-3 rounded-xl font-bold ${flatBorder} ${bounceClass} flex items-center justify-center gap-2`}
+            className={`w-full bg-brand-yellow py-3 rounded-xl font-bold ${flatBorder} ${bounceClass} flex items-center justify-center gap-2`}
             style={springStyle}
           >
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : '家事マスタに追加'}
@@ -200,13 +200,13 @@ export default function Settings() {
                            type="text"
                            value={editTaskName}
                            onChange={e => setEditTaskName(e.target.value)}
-                           className={`flex-1 p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-yellow-400`}
+                           className={`flex-1 p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-yellow`}
                          />
                       </div>
                       <select
                         value={editTaskCat}
                         onChange={e => setEditTaskCat(e.target.value)}
-                        className={`w-full p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold focus:outline-none focus:ring-2 focus:ring-yellow-400 appearance-none`}
+                        className={`w-full p-2 rounded-lg bg-white ${flatBorder} text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-yellow appearance-none`}
                       >
                         {CATEGORIES.map(c => (
                           <option key={c.id} value={c.id}>{c.name}</option>
@@ -219,7 +219,7 @@ export default function Settings() {
                          <button type="button" onClick={() => setEditingTaskId(null)} className={`p-2 rounded-lg text-stone-500 bg-stone-100 font-bold text-xs ${flatBorder} flex items-center gap-1`}>
                            <X className="w-4 h-4" /> キャンセル
                          </button>
-                         <button type="submit" disabled={submitting} className={`p-2 rounded-lg text-stone-900 bg-yellow-300 font-bold text-xs ${flatBorder} flex items-center gap-1`}>
+                         <button type="submit" disabled={submitting} className={`p-2 rounded-lg text-stone-900 bg-brand-yellow font-bold text-xs ${flatBorder} flex items-center gap-1`}>
                            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} 保存
                          </button>
                       </div>
@@ -242,7 +242,7 @@ export default function Settings() {
                               setEditTaskPoints(task.points);
                               setEditTaskCat(task.categoryId || 'other');
                             }}
-                            className={`p-1.5 rounded-lg text-stone-400 hover:text-teal-600 hover:bg-teal-50 transition-colors ${flatBorder}`}
+                            className={`p-1.5 rounded-lg text-stone-400 hover:text-brand-teal hover:bg-brand-teal/10 transition-colors ${flatBorder}`}
                           >
                             <Pencil className="w-4 h-4" />
                           </button>

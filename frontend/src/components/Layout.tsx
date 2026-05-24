@@ -23,7 +23,7 @@ export default function Layout() {
   if (!initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-amber-50">
-        <div className="w-8 h-8 border-4 border-teal-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-teal border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -35,7 +35,7 @@ export default function Layout() {
         <p className="text-sm text-stone-500">ネットワーク接続を確認して再読み込みしてください</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-2 px-5 py-2 bg-teal-400 font-bold border-2 border-stone-800 rounded shadow-[2px_2px_0px_#1c1917] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+          className="mt-2 px-5 py-2 bg-brand-teal text-white font-bold border-2 border-stone-800 rounded shadow-[2px_2px_0px_#1c1917] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
         >
           再読み込み
         </button>
@@ -47,11 +47,11 @@ export default function Layout() {
     <div className="min-h-screen bg-amber-50 text-stone-800 font-sans pb-24">
       <header className="bg-white px-4 py-3 flex items-center justify-between border-b-2 border-stone-800 sticky top-0 z-10">
         <h1 className="text-xl font-black tracking-wider flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-yellow-500" />
+          <Sparkles className="w-5 h-5 text-brand-yellow" />
           iezi
         </h1>
         {myName && (
-          <div className={`bg-yellow-200 px-3 py-1 rounded-full font-bold text-sm ${flatBorder}`}>
+          <div className={`bg-brand-yellow px-3 py-1 rounded-full font-bold text-sm ${flatBorder}`}>
             {myName}
           </div>
         )}

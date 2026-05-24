@@ -14,7 +14,7 @@ import type { User, TaskMaster, TaskHistory, DailySummary } from './types';
 import { apiGet, apiPost, apiPut, apiDelete } from './lib/api';
 import { dateKeyToTimestamp, getJSTDateString } from './lib/time';
 
-const MEMBER_COLORS = ['bg-yellow-300', 'bg-orange-300', 'bg-teal-300', 'bg-purple-300'];
+const MEMBER_COLORS = ['bg-brand-yellow', 'bg-brand-rose', 'bg-brand-teal', 'bg-brand-green'];
 
 // 既存メンバーの色は維持し、新規メンバーには未使用の色を割り当てる
 function assignMemberColors(users: FamilyInitResponse['users'], prev: User[]): User[] {

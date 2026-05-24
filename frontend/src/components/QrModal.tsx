@@ -44,7 +44,7 @@ export default function QrModal({ onClose }: QrModalProps) {
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-10 h-10 animate-spin text-teal-400" />
+            <Loader2 className="w-10 h-10 animate-spin text-brand-teal" />
           </div>
         ) : error ? (
           <div className="text-center py-8 text-red-500 font-bold">{error}</div>

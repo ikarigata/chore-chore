@@ -29,14 +29,14 @@ export default function Invite() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-teal-50">
-        <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+      <div className="min-h-screen flex items-center justify-center bg-brand-teal/10">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-teal" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-teal-50 flex flex-col items-center justify-center p-6 text-stone-800">
+    <div className="min-h-screen bg-brand-teal/10 flex flex-col items-center justify-center p-6 text-stone-800">
       <div className={`bg-white w-full max-w-sm rounded-3xl p-8 ${flatBorder} shadow-[8px_8px_0px_#292524] text-center relative`}>
         <button
           onClick={() => navigate(-1)}
@@ -45,7 +45,7 @@ export default function Invite() {
           <X className="w-5 h-5" />
         </button>
 
-        <div className="w-20 h-20 bg-yellow-200 rounded-full border-4 border-stone-800 mx-auto mb-6 flex items-center justify-center">
+        <div className="w-20 h-20 bg-brand-yellow rounded-full border-4 border-stone-800 mx-auto mb-6 flex items-center justify-center">
           <Sparkles className="w-10 h-10 text-stone-800" />
         </div>
 
@@ -56,7 +56,7 @@ export default function Invite() {
 
         <button
           onClick={() => navigate('/auth')}
-          className={`w-full bg-teal-400 py-4 rounded-xl font-black text-lg border-2 border-stone-800 shadow-[0px_4px_0px_#292524] active:shadow-none active:translate-y-1 transition-all`}
+          className={`w-full bg-brand-teal text-white py-4 rounded-xl font-black text-lg border-2 border-stone-800 shadow-[0px_4px_0px_#292524] active:shadow-none active:translate-y-1 transition-all`}
         >
           アカウントを作って参加する
         </button>

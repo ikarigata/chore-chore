@@ -58,7 +58,7 @@ export default function DateChipSheet({ value, onSelect, onClose, title = 'æ—¥ä»
                   onClose()
                 }}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl ${flatBorder} font-bold ${bounceClass} ${
-                  isSelected ? 'bg-teal-200 shadow-[2px_2px_0px_#292524]' : 'bg-white'
+                  isSelected ? 'bg-brand-teal text-white shadow-[2px_2px_0px_#292524]' : 'bg-white'
                 }`}
                 style={springStyle}
               >

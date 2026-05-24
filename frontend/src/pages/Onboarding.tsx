@@ -36,9 +36,9 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-teal-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-brand-teal/10 flex flex-col items-center justify-center p-6">
       <div className={`bg-white w-full max-w-sm rounded-3xl p-8 ${flatBorder} shadow-[8px_8px_0px_#292524] text-center`}>
-        <div className="w-20 h-20 bg-yellow-200 rounded-full border-4 border-stone-800 mx-auto mb-6 flex items-center justify-center">
+        <div className="w-20 h-20 bg-brand-yellow rounded-full border-4 border-stone-800 mx-auto mb-6 flex items-center justify-center">
           {inviteToken
             ? <Users className="w-10 h-10 text-stone-800" />
             : <Sparkles className="w-10 h-10 text-stone-800" />}
@@ -59,13 +59,13 @@ export default function Onboarding() {
             placeholder="ニックネーム（例: パパ、ママ）"
             value={displayName}
             onChange={e => setDisplayName(e.target.value)}
-            className={`w-full p-3 rounded-xl bg-stone-50 ${flatBorder} font-bold text-center focus:outline-none focus:ring-2 focus:ring-teal-400`}
+            className={`w-full p-3 rounded-xl bg-stone-50 ${flatBorder} font-bold text-center focus:outline-none focus:ring-2 focus:ring-brand-teal`}
           />
           {error && <p className="text-red-500 text-sm font-bold">{error}</p>}
           <button
             type="submit"
             disabled={loading || !displayName.trim()}
-            className={`w-full bg-teal-400 py-4 rounded-xl font-black text-lg ${flatBorder} shadow-[0px_4px_0px_#292524] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-50`}
+            className={`w-full bg-brand-teal text-white py-4 rounded-xl font-black text-lg ${flatBorder} shadow-[0px_4px_0px_#292524] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-50`}
           >
             {loading
               ? <Loader2 className="w-6 h-6 animate-spin" />
