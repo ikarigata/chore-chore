@@ -344,6 +344,7 @@ export default function Settings() {
         <div className="space-y-2">
           {taskMasters
             .filter(t => (filterCat ? t.categoryId === filterCat : true))
+            .sort((a, b) => a.taskName.localeCompare(b.taskName, 'ja'))
             .map(task => {
               const cat = CATEGORIES.find(c => c.id === task.categoryId);
               return (

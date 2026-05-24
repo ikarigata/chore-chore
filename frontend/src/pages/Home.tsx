@@ -176,7 +176,7 @@ export default function Home() {
               </button>
             </div>
 
-            {taskMasters.filter(t => t.categoryId === selectedCategory).map(task => (
+            {taskMasters.filter(t => t.categoryId === selectedCategory).sort((a, b) => a.taskName.localeCompare(b.taskName, 'ja')).map(task => (
               <div key={task.taskId} className={`bg-white p-3 rounded-2xl ${flatBorder} flex items-center justify-between shadow-[2px_2px_0px_#292524]`}>
                 <div className="flex items-center justify-between w-full">
                   <div>
