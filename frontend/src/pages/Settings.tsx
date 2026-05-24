@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { QrCode, Plus, Trash2, Loader2, Pencil, X, Check } from 'lucide-react';
+import { QrCode, Plus, Trash2, Loader2, Pencil, X, Check, User as UserIcon } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useApp } from '../context';
 import { CATEGORIES } from '../constants';
@@ -8,8 +8,15 @@ import type { LayoutOutletContext } from '../components/Layout';
 import PointInput from '../components/PointInput';
 
 export default function Settings() {
-  const { taskMasters, upsertTaskMaster, deleteTaskMaster } = useApp();
+  const { members, mySub, taskMasters, updateMyDisplayName, upsertTaskMaster, deleteTaskMaster } = useApp();
   const { onOpenQr } = useOutletContext<LayoutOutletContext>();
+
+  const me = members.find(m => m.cognitoSub === mySub);
+
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const [savingName, setSavingName] = useState(false);
+  const [nameError, setNameError] = useState('');
 
   const [newTaskName, setNewTaskName] = useState('');
   const [newTaskPoints, setNewTaskPoints] = useState(10);
@@ -66,6 +73,29 @@ export default function Settings() {
     }
   };
 
+  const handleUpdateDisplayName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = nameDraft.trim();
+    if (!trimmed) {
+      setNameError('名前を入力してください');
+      return;
+    }
+    if (trimmed.length > 50) {
+      setNameError('名前は50文字以内で入力してください');
+      return;
+    }
+    setNameError('');
+    setSavingName(true);
+    try {
+      await updateMyDisplayName(trimmed);
+      setEditingName(false);
+    } catch (err) {
+      setNameError((err as Error).message ?? '保存に失敗しました');
+    } finally {
+      setSavingName(false);
+    }
+  };
+
   const handleDeleteTaskMaster = async (taskId: string) => {
     setDeletingId(taskId);
     try {
@@ -110,6 +140,68 @@ export default function Settings() {
           </div>
         </div>
       )}
+      {/* 自分のプロフィール */}
+      {me && (
+        <section className={`bg-white p-4 rounded-2xl ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
+          {editingName ? (
+            <form onSubmit={handleUpdateDisplayName} className="space-y-3">
+              <label className="block text-xs font-bold text-stone-500">あなたの表示名</label>
+              <input
+                type="text"
+                value={nameDraft}
+                onChange={e => setNameDraft(e.target.value)}
+                maxLength={50}
+                autoFocus
+                className={`w-full p-3 rounded-xl bg-white ${flatBorder} font-bold placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-teal`}
+              />
+              {nameError && <p className="text-red-500 text-sm font-bold">{nameError}</p>}
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingName(false);
+                    setNameError('');
+                  }}
+                  className={`px-3 py-2 rounded-lg text-stone-500 bg-stone-100 font-bold text-xs ${flatBorder} flex items-center gap-1`}
+                >
+                  <X className="w-4 h-4" /> キャンセル
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingName}
+                  className={`px-3 py-2 rounded-lg text-stone-900 bg-brand-teal/60 font-bold text-xs ${flatBorder} flex items-center gap-1`}
+                >
+                  {savingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} 保存
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full ${me.color} ${flatBorder} flex items-center justify-center`}>
+                  <UserIcon className="w-5 h-5 text-stone-800" />
+                </div>
+                <div className="text-left">
+                  <div className="text-xs font-bold text-stone-500">あなたの表示名</div>
+                  <div className="font-bold text-lg">{me.displayName}</div>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setNameDraft(me.displayName);
+                  setNameError('');
+                  setEditingName(true);
+                }}
+                className={`p-2 rounded-lg text-stone-500 hover:text-brand-teal hover:bg-brand-teal/10 transition-colors ${flatBorder}`}
+                aria-label="表示名を編集"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
       {/* 家族招待 */}
       <button
         onClick={onOpenQr}

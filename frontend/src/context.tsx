@@ -43,6 +43,7 @@ interface AppContextType {
   todaySummaries: DailySummary[];
   weeklySummaries: DailySummary[];
   negurai: Negurai[];
+  updateMyDisplayName: (displayName: string) => Promise<void>;
   upsertTaskMaster: (task: TaskMaster) => Promise<void>;
   deleteTaskMaster: (taskId: string) => Promise<void>;
   createTaskHistory: (task: TaskMaster, opts?: { dateKey?: string }) => Promise<void>;
@@ -114,6 +115,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [initialized, processingId, refreshAllData]);
+
+  const updateMyDisplayName = async (displayName: string) => {
+    if (!mySub) return;
+    const trimmed = displayName.trim();
+    await apiPut('/users/me', { displayName: trimmed });
+    setMembers(prev =>
+      prev.map(m => (m.cognitoSub === mySub ? { ...m, displayName: trimmed } : m)),
+    );
+  };
 
   const upsertTaskMaster = async (task: TaskMaster) => {
     await apiPut('/tasks', { taskId: task.taskId, taskName: task.taskName, points: task.points, categoryId: task.categoryId });
@@ -245,6 +255,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       todaySummaries,
       weeklySummaries,
       negurai,
+      updateMyDisplayName,
       upsertTaskMaster,
       deleteTaskMaster,
       createTaskHistory,

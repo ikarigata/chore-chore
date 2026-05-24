@@ -6,6 +6,7 @@ import {
   PutCommand,
   QueryCommand,
   TransactWriteCommand,
+  UpdateCommand,
 } from '@aws-sdk/lib-dynamodb'
 import { AppError } from '../../errors.js'
 import type {
@@ -346,6 +347,29 @@ export class DynamoFamilyRepository implements IFamilyRepository {
     } catch (err) {
       if ((err as { name?: string }).name === 'ConditionalCheckFailedException') {
         throw new AppError(409, '既に家族に所属しています')
+      }
+      throw err
+    }
+  }
+
+  async updateUserDisplayName(
+    familyId: FamilyID,
+    cognitoSub: CognitoSub,
+    displayName: string,
+  ): Promise<void> {
+    try {
+      await this.client.send(
+        new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: { FamilyID: familyId, DataSortKey: `USER#${cognitoSub}` },
+          UpdateExpression: 'SET DisplayName = :displayName',
+          ConditionExpression: 'attribute_exists(DataSortKey)',
+          ExpressionAttributeValues: { ':displayName': displayName },
+        }),
+      )
+    } catch (err) {
+      if ((err as { name?: string }).name === 'ConditionalCheckFailedException') {
+        throw new AppError(404, 'ユーザーが見つかりません')
       }
       throw err
     }

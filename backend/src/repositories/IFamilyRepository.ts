@@ -63,6 +63,7 @@ export interface IFamilyRepository {
   upsertTaskMaster(familyId: FamilyID, input: UpsertTaskMasterInput): Promise<void>
   deleteTaskMaster(familyId: FamilyID, taskId: TaskID): Promise<void>
   createFamily(familyId: FamilyID, cognitoSub: CognitoSub, displayName: string): Promise<void>
+  updateUserDisplayName(familyId: FamilyID, cognitoSub: CognitoSub, displayName: string): Promise<void>
   createInvite(familyId: FamilyID, token: string, expiresAt: number): Promise<void>
   consumeInvite(token: string, cognitoSub: CognitoSub, displayName: string): Promise<FamilyID>
   listNegurai(familyId: FamilyID): Promise<Negurai[]>

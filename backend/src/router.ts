@@ -13,6 +13,7 @@ import { taskDeleteHandler } from './handlers/taskDelete.js'
 import { taskExecuteHandler } from './handlers/taskExecute.js'
 import { taskExecuteCancelHandler } from './handlers/taskExecuteCancel.js'
 import { taskUpsertHandler } from './handlers/taskUpsert.js'
+import { userUpdateHandler } from './handlers/userUpdate.js'
 import type { IFamilyRepository } from './repositories/IFamilyRepository.js'
 import type { ICognitoService } from './services/ICognitoService.js'
 import type { HandlerRequest, HandlerResponse, RequestContext } from './types/domain.js'
@@ -59,6 +60,10 @@ export async function route(
 
     case 'DELETE /negurai':
       return neguraiDeleteHandler(ctx, req, deps)
+
+    case 'PUT /users':
+      if (seg1 === 'me') return userUpdateHandler(ctx, req, deps)
+      break
 
     case 'PUT /tasks':
       return taskUpsertHandler(ctx, req, deps)

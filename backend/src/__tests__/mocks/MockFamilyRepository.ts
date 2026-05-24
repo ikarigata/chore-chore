@@ -74,6 +74,18 @@ export class MockFamilyRepository implements IFamilyRepository {
 
   async createFamily(_familyId: FamilyID, _cognitoSub: CognitoSub, _displayName: string): Promise<void> {}
 
+  updateUserDisplayNameCalls: Array<[FamilyID, CognitoSub, string]> = []
+  updateUserDisplayNameError?: Error
+
+  async updateUserDisplayName(
+    familyId: FamilyID,
+    cognitoSub: CognitoSub,
+    displayName: string,
+  ): Promise<void> {
+    this.updateUserDisplayNameCalls.push([familyId, cognitoSub, displayName])
+    if (this.updateUserDisplayNameError) throw this.updateUserDisplayNameError
+  }
+
   async createInvite(_familyId: FamilyID, _token: string, _expiresAt: number): Promise<void> {}
 
   async consumeInvite(_token: string, _cognitoSub: CognitoSub, _displayName: string): Promise<FamilyID> {

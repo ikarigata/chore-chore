@@ -106,6 +106,10 @@ export const NeguraiListResponseSchema = z.object({
   negurai: z.array(NeguraiSchema),
 });
 
+export const UserUpdateRequestSchema = z.object({
+  displayName: z.string().trim().min(1).max(50),
+});
+
 export const FamilyCreateRequestSchema = z.object({
   displayName: z.string().min(1),
 });
@@ -139,6 +143,7 @@ export type TaskHistoryDeleteRequest = z.infer<typeof TaskHistoryDeleteRequestSc
 export type NeguraiCreateRequest = z.infer<typeof NeguraiCreateRequestSchema>;
 export type NeguraiDeleteRequest = z.infer<typeof NeguraiDeleteRequestSchema>;
 export type NeguraiListResponse = z.infer<typeof NeguraiListResponseSchema>;
+export type UserUpdateRequest = z.infer<typeof UserUpdateRequestSchema>;
 export type FamilyCreateRequest = z.infer<typeof FamilyCreateRequestSchema>;
 export type FamilyJoinRequest = z.infer<typeof FamilyJoinRequestSchema>;
 export type FamilyCreateResponse = z.infer<typeof FamilyCreateResponseSchema>;
