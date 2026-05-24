@@ -39,7 +39,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="h-32 relative flex items-end justify-between pt-4 border-t-2 border-stone-100">
+        <div className="h-36 relative flex items-end justify-between pt-4 border-t-2 border-stone-100">
           <div className="absolute top-0 w-full border-b border-dashed border-stone-200"></div>
           <div className="absolute top-1/2 w-full border-b border-dashed border-stone-200"></div>
 
@@ -55,7 +55,7 @@ export default function Home() {
                     return (
                       <div
                         key={m.cognitoSub}
-                        className={`w-full ${m.color} border-x border-t border-stone-800 transition-all duration-500 ease-out first:rounded-b-sm last:rounded-t-sm`}
+                        className={`w-full ${m.color} border-x-2 border-t-2 border-stone-800 transition-all duration-500 ease-out first:rounded-b-sm last:rounded-t-sm`}
                         style={{ height: `${(daily / maxWeeklyPoints) * 100}%`, ...springStyle }}
                       />
                     );
@@ -67,6 +67,11 @@ export default function Home() {
                 <span className={`text-[10px] font-bold ${isToday ? 'text-teal-600' : 'text-stone-400'}`}>
                   {isToday ? '今日' : displayDate}
                 </span>
+                {!isToday && (
+                  <span className={`text-[9px] font-bold leading-none ${isToday ? 'text-teal-500' : 'text-stone-400'}`}>
+                    （{new Intl.DateTimeFormat('ja-JP', { weekday: 'narrow', timeZone: 'Asia/Tokyo' }).format(new Date(date))}）
+                  </span>
+                )}
               </div>
             );
           })}
