@@ -30,7 +30,7 @@ export default function UserScore({ user, dailyPoints, weeklyPoints }: Props) {
 
       {/* 今週の合計 */}
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[10px] font-bold text-stone-400">今週の合計</span>
+        <span className="text-[10px] font-bold text-stone-400">2週間の合計</span>
         <div className="flex items-baseline gap-0.5">
           <span className="text-sm font-black text-stone-700">{weeklyPoints.toLocaleString()}</span>
           <span className="text-[10px] font-bold text-stone-400">pt</span>

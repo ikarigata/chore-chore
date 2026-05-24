@@ -6,7 +6,7 @@ interface Deps {
   familyRepo: IFamilyRepository
 }
 
-const WINDOW_DAYS = 7
+const WINDOW_DAYS = 14
 
 // YYYY-MM-DD の日付文字列から N 日引いた日付を JST で返す
 function subtractDaysJST(dateStr: string, days: number): string {
