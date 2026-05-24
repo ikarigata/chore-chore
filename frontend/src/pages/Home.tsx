@@ -82,7 +82,7 @@ export default function Home() {
                       return (
                         <div
                           key={m.cognitoSub}
-                          className={`w-full ${m.color} border-x-2 border-t-2 border-stone-800 transition-all duration-500 ease-out first:rounded-b-sm last:rounded-t-sm`}
+                          className={`w-full ${m.color} border-x-2 border-t-2 border-stone-800 transition-all duration-500 ease-out first:border-b-2 first:rounded-b-md last:rounded-t-md`}
                           style={{ height: `${(daily / maxWeeklyPoints) * 100}%`, ...springStyle }}
                         />
                       );
