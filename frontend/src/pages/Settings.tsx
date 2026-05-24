@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { QrCode, Plus, Trash2, Loader2, Pencil, X, Check, User as UserIcon } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useApp } from '../context';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES, USER_ICONS } from '../constants';
 import { springStyle, bounceClass, flatBorder } from '../styles';
 import type { LayoutOutletContext } from '../components/Layout';
 import PointInput from '../components/PointInput';
 
 export default function Settings() {
-  const { members, mySub, taskMasters, updateMyDisplayName, upsertTaskMaster, deleteTaskMaster } = useApp();
+  const { members, mySub, taskMasters, updateMyProfile, upsertTaskMaster, deleteTaskMaster } = useApp();
   const { onOpenQr } = useOutletContext<LayoutOutletContext>();
 
   const me = members.find(m => m.cognitoSub === mySub);
@@ -17,6 +17,9 @@ export default function Settings() {
   const [nameDraft, setNameDraft] = useState('');
   const [savingName, setSavingName] = useState(false);
   const [nameError, setNameError] = useState('');
+
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const [savingIcon, setSavingIcon] = useState<string | null>(null);
 
   const [newTaskName, setNewTaskName] = useState('');
   const [newTaskPoints, setNewTaskPoints] = useState(10);
@@ -87,12 +90,25 @@ export default function Settings() {
     setNameError('');
     setSavingName(true);
     try {
-      await updateMyDisplayName(trimmed);
+      await updateMyProfile({ displayName: trimmed });
       setEditingName(false);
     } catch (err) {
       setNameError((err as Error).message ?? '保存に失敗しました');
     } finally {
       setSavingName(false);
+    }
+  };
+
+  const handleSelectIcon = async (icon: string) => {
+    if (savingIcon) return;
+    setSavingIcon(icon);
+    try {
+      await updateMyProfile({ icon });
+      setIconPickerOpen(false);
+    } catch (err) {
+      console.error('アイコン保存に失敗しました', err);
+    } finally {
+      setSavingIcon(null);
     }
   };
 
@@ -109,6 +125,42 @@ export default function Settings() {
 
   return (
     <div className="p-4 space-y-6">
+      {/* アイコン選択モーダル */}
+      {iconPickerOpen && me && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
+          <div className={`bg-white rounded-2xl ${flatBorder} shadow-[6px_6px_0px_#292524] p-5 w-full max-w-sm`}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-black text-base">アイコンを選ぶ</p>
+              <button
+                onClick={() => setIconPickerOpen(false)}
+                aria-label="閉じる"
+                className={`p-1.5 rounded-lg bg-stone-100 ${flatBorder}`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-6 gap-2">
+              {USER_ICONS.map(icon => {
+                const isCurrent = me.icon === icon;
+                const isSaving = savingIcon === icon;
+                return (
+                  <button
+                    key={icon}
+                    onClick={() => handleSelectIcon(icon)}
+                    disabled={savingIcon !== null}
+                    className={`aspect-square rounded-xl flex items-center justify-center text-2xl ${flatBorder} ${bounceClass} ${isCurrent ? `${me.color} shadow-[2px_2px_0px_#292524]` : 'bg-white'} ${isSaving ? 'opacity-60' : ''}`}
+                    style={springStyle}
+                    aria-label={`アイコン ${icon}`}
+                  >
+                    {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : icon}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 削除確認ダイアログ */}
       {confirmDeleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6">
@@ -178,9 +230,18 @@ export default function Settings() {
           ) : (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full ${me.color} ${flatBorder} flex items-center justify-center`}>
-                  <UserIcon className="w-5 h-5 text-stone-800" />
-                </div>
+                <button
+                  onClick={() => setIconPickerOpen(true)}
+                  aria-label="アイコンを選ぶ"
+                  className={`w-12 h-12 rounded-full ${me.color} ${flatBorder} flex items-center justify-center ${bounceClass} shadow-[2px_2px_0px_#292524]`}
+                  style={springStyle}
+                >
+                  {me.icon ? (
+                    <span className="text-2xl leading-none">{me.icon}</span>
+                  ) : (
+                    <UserIcon className="w-5 h-5 text-stone-800" />
+                  )}
+                </button>
                 <div className="text-left">
                   <div className="text-xs font-bold text-stone-500">あなたの表示名</div>
                   <div className="font-bold text-lg">{me.displayName}</div>

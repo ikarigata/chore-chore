@@ -43,7 +43,7 @@ interface AppContextType {
   todaySummaries: DailySummary[];
   weeklySummaries: DailySummary[];
   negurai: Negurai[];
-  updateMyDisplayName: (displayName: string) => Promise<void>;
+  updateMyProfile: (patch: { displayName?: string; icon?: string }) => Promise<void>;
   upsertTaskMaster: (task: TaskMaster) => Promise<void>;
   deleteTaskMaster: (taskId: string) => Promise<void>;
   createTaskHistory: (task: TaskMaster, opts?: { dateKey?: string }) => Promise<void>;
@@ -116,12 +116,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [initialized, processingId, refreshAllData]);
 
-  const updateMyDisplayName = async (displayName: string) => {
+  const updateMyProfile = async (patch: { displayName?: string; icon?: string }) => {
     if (!mySub) return;
-    const trimmed = displayName.trim();
-    await apiPut('/users/me', { displayName: trimmed });
+    const body: { displayName?: string; icon?: string } = {};
+    if (patch.displayName !== undefined) body.displayName = patch.displayName.trim();
+    if (patch.icon !== undefined) body.icon = patch.icon;
+    await apiPut('/users/me', body);
     setMembers(prev =>
-      prev.map(m => (m.cognitoSub === mySub ? { ...m, displayName: trimmed } : m)),
+      prev.map(m => (m.cognitoSub === mySub ? { ...m, ...body } : m)),
     );
   };
 
@@ -255,7 +257,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       todaySummaries,
       weeklySummaries,
       negurai,
-      updateMyDisplayName,
+      updateMyProfile,
       upsertTaskMaster,
       deleteTaskMaster,
       createTaskHistory,

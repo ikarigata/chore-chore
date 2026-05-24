@@ -23,8 +23,8 @@ describe('userUpdateHandler', () => {
     )
 
     expect(res.statusCode).toBe(200)
-    expect(repo.updateUserDisplayNameCalls).toHaveLength(1)
-    expect(repo.updateUserDisplayNameCalls[0]).toEqual(['family-1', 'sub-1', 'パパ改'])
+    expect(repo.updateUserProfileCalls).toHaveLength(1)
+    expect(repo.updateUserProfileCalls[0]).toEqual(['family-1', 'sub-1', { displayName: 'パパ改' }])
   })
 
   it('前後の空白はトリムされて保存される', async () => {
@@ -34,7 +34,28 @@ describe('userUpdateHandler', () => {
       { familyRepo: repo },
     )
 
-    expect(repo.updateUserDisplayNameCalls[0]?.[2]).toBe('ママ')
+    expect(repo.updateUserProfileCalls[0]?.[2]).toEqual({ displayName: 'ママ' })
+  })
+
+  it('icon を単独で更新できる', async () => {
+    const res = await userUpdateHandler(
+      CTX,
+      makeReq({ icon: '🐱' }),
+      { familyRepo: repo },
+    )
+
+    expect(res.statusCode).toBe(200)
+    expect(repo.updateUserProfileCalls[0]).toEqual(['family-1', 'sub-1', { icon: '🐱' }])
+  })
+
+  it('displayName と icon を同時に更新できる', async () => {
+    await userUpdateHandler(
+      CTX,
+      makeReq({ displayName: 'パパ', icon: '🐻' }),
+      { familyRepo: repo },
+    )
+
+    expect(repo.updateUserProfileCalls[0]?.[2]).toEqual({ displayName: 'パパ', icon: '🐻' })
   })
 
   it('displayName が空文字の場合 400 を投げる', async () => {
@@ -59,7 +80,7 @@ describe('userUpdateHandler', () => {
     ).rejects.toThrow()
   })
 
-  it('displayName が無い場合 400 を投げる', async () => {
+  it('displayName も icon も無い場合 400 を投げる', async () => {
     await expect(
       userUpdateHandler(CTX, makeReq({}), { familyRepo: repo }),
     ).rejects.toThrow()

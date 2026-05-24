@@ -7,6 +7,7 @@ export const UserSchema = z.object({
   displayName: z.string(),
   totalPoints: z.number(),
   neguraiPoints: z.number().optional(),
+  icon: z.string().max(8).optional(),
 });
 
 export const TaskMasterSchema = z.object({
@@ -106,9 +107,14 @@ export const NeguraiListResponseSchema = z.object({
   negurai: z.array(NeguraiSchema),
 });
 
-export const UserUpdateRequestSchema = z.object({
-  displayName: z.string().trim().min(1).max(50),
-});
+export const UserUpdateRequestSchema = z
+  .object({
+    displayName: z.string().trim().min(1).max(50).optional(),
+    icon: z.string().max(8).optional(),
+  })
+  .refine(v => v.displayName !== undefined || v.icon !== undefined, {
+    message: 'displayName または icon のいずれかを指定してください',
+  });
 
 export const FamilyCreateRequestSchema = z.object({
   displayName: z.string().min(1),

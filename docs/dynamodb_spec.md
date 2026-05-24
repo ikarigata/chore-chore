@@ -34,6 +34,7 @@
 - **SK形式**: `USER#{CognitoSub}`
 - **主要属性**:
   - `DisplayName` (String): ユーザーの表示名
+  - `Icon` (String, optional): ユーザーアイコン（絵文字1文字、最大8バイト）。属性が存在しない既存レコードは未設定として扱う。
   - `TotalPoints` (Number): 家事ポイントの累積合計（★トランザクションで同期加算）
   - `NeguraiPoints` (Number): ねぎらいポイントの累積合計（★トランザクションで同期加算）。属性が存在しない既存レコードは 0 相当として扱う。
 

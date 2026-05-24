@@ -17,11 +17,11 @@ export async function userUpdateHandler(
     throw new AppError(400, `入力形式が正しくありません: ${result.error.message}`)
   }
 
-  await deps.familyRepo.updateUserDisplayName(
+  await deps.familyRepo.updateUserProfile(
     ctx.familyId,
     ctx.cognitoSub,
-    result.data.displayName,
+    result.data,
   )
 
-  return { statusCode: 200, body: { message: '表示名を更新しました' } }
+  return { statusCode: 200, body: { message: 'プロフィールを更新しました' } }
 }

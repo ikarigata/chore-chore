@@ -38,12 +38,14 @@ type DynamoItem = Record<string, unknown>
 
 function parseUser(item: DynamoItem): User {
   const sk = item['DataSortKey'] as string
-  return {
+  const user: User = {
     cognitoSub: sk.slice('USER#'.length),
     displayName: item['DisplayName'] as string,
     totalPoints: (item['TotalPoints'] as number) ?? 0,
     neguraiPoints: (item['NeguraiPoints'] as number) ?? 0,
   }
+  if (item['Icon'] !== undefined) user.icon = item['Icon'] as string
+  return user
 }
 
 function parseNegurai(item: DynamoItem): Negurai {
@@ -352,19 +354,30 @@ export class DynamoFamilyRepository implements IFamilyRepository {
     }
   }
 
-  async updateUserDisplayName(
+  async updateUserProfile(
     familyId: FamilyID,
     cognitoSub: CognitoSub,
-    displayName: string,
+    patch: { displayName?: string; icon?: string },
   ): Promise<void> {
+    const sets: string[] = []
+    const values: Record<string, unknown> = {}
+    if (patch.displayName !== undefined) {
+      sets.push('DisplayName = :displayName')
+      values[':displayName'] = patch.displayName
+    }
+    if (patch.icon !== undefined) {
+      sets.push('Icon = :icon')
+      values[':icon'] = patch.icon
+    }
+    if (sets.length === 0) return
     try {
       await this.client.send(
         new UpdateCommand({
           TableName: TABLE_NAME,
           Key: { FamilyID: familyId, DataSortKey: `USER#${cognitoSub}` },
-          UpdateExpression: 'SET DisplayName = :displayName',
+          UpdateExpression: `SET ${sets.join(', ')}`,
           ConditionExpression: 'attribute_exists(DataSortKey)',
-          ExpressionAttributeValues: { ':displayName': displayName },
+          ExpressionAttributeValues: values,
         }),
       )
     } catch (err) {

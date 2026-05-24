@@ -9,3 +9,13 @@ export const CATEGORIES: Category[] = [
   { id: 'shopping', name: '買物',   icon: ShoppingCart, color: 'bg-brand-green/25' },
   { id: 'other',    name: 'その他', icon: Box,          color: 'bg-stone-200' },
 ];
+
+// ユーザーアイコン用の絵文字パレット（curated）
+export const USER_ICONS: string[] = [
+  '😀', '😎', '🥰', '🤓', '😴', '🤔',
+  '🐱', '🐶', '🐰', '🦊', '🐼', '🐻',
+  '🐯', '🦁', '🐧', '🐸', '🐙', '🦄',
+  '🍎', '🍰', '🍩', '🍣', '🍕', '🍜',
+  '🌸', '🌻', '🌈', '⭐', '🍀', '🔥',
+  '👑', '🎮', '⚽', '🚀', '🎵', '✨',
+];

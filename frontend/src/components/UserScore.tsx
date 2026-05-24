@@ -9,15 +9,25 @@ interface Props {
 
 export default function UserScore({ user, dailyPoints, weeklyPoints }: Props) {
   return (
-    <div className={`flex-1 rounded-2xl p-3 bg-white ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
+    <div className={`relative flex-1 rounded-2xl p-3 bg-white ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
+      {/* アイコンバッジ（カード右上の空きスペースに収める） */}
+      {user.icon && (
+        <div
+          className={`absolute top-3 right-3 w-14 h-14 rounded-full ${user.color} ${flatBorder} shadow-[2px_2px_0px_#292524] flex items-center justify-center text-3xl leading-none pointer-events-none`}
+          aria-hidden="true"
+        >
+          {user.icon}
+        </div>
+      )}
+
       {/* ユーザー名 */}
-      <div className="flex items-center gap-1.5 mb-2.5">
+      <div className="flex items-center gap-1.5 mb-2.5 pr-16">
         <div className={`w-2.5 h-2.5 rounded-full ${user.color} ${flatBorder}`} />
         <span className="text-xs font-black truncate">{user.displayName}</span>
       </div>
 
       {/* 今日の獲得 — 最も目立つ */}
-      <div className="mb-2.5">
+      <div className="mb-2.5 pr-16">
         <div className="text-[10px] font-bold text-brand-teal mb-0.5">今日の獲得</div>
         <div className="flex items-baseline gap-0.5 leading-none">
           <span className="text-3xl font-black text-stone-900">{dailyPoints}</span>
