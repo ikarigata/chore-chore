@@ -118,48 +118,48 @@ export default function History() {
 
                       {/* カード */}
                       <div className={`flex-1 px-3 py-2 rounded-2xl bg-white ${flatBorder} shadow-[2px_2px_0px_#292524]`}>
-                        {/* 上段: 家事名 + ポイントバッジ */}
-                        <div className="flex justify-between items-start gap-2">
-                          <span className="font-bold text-sm leading-snug flex-1">
-                            {taskMasters.find(t => t.taskId === item.taskId)?.taskName ?? item.taskId}
-                          </span>
-                          <span className="text-xs font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-full border border-brand-teal/30 shrink-0">
-                            +{item.points}pt
-                          </span>
-                        </div>
-                        {/* 下段: メンバー · 時刻 ｜ 取り消し */}
-                        <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-stone-100">
-                          {/* 左: メンバーと時刻をひとまとめ */}
-                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-stone-500">
-                            <span className={`w-2 h-2 rounded-full shrink-0 ${member?.color ?? 'bg-stone-300'}`} />
-                            <span>{isMe ? 'あなた' : (member?.displayName ?? '不明')}</span>
-                            <span className="text-stone-300">·</span>
-                            <span className="text-stone-400">{timeLabel}</span>
+                          {/* 上段: 家事名 + ポイントバッジ */}
+                          <div className="flex justify-between items-start gap-2">
+                            <span className="font-bold text-sm leading-snug flex-1">
+                              {taskMasters.find(t => t.taskId === item.taskId)?.taskName ?? item.taskId}
+                            </span>
+                            <span className="text-xs font-black text-brand-teal bg-brand-teal/10 px-2 py-0.5 rounded-full border border-brand-teal/30 shrink-0">
+                              +{item.points}pt
+                            </span>
                           </div>
-                          {/* 右: 日付変更・取り消しボタン（自分の実績のみ） */}
-                          {isMe && (
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                onClick={() => setEditing(item)}
-                                disabled={processingId !== null}
-                                title="日付を変更"
-                                className={`p-1.5 rounded-lg text-stone-400 hover:text-brand-teal hover:bg-brand-teal/10 transition-colors disabled:opacity-40 ${flatBorder}`}
-                              >
-                                <Calendar className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleCancel(item)}
-                                disabled={processingId !== null}
-                                title="取り消す"
-                                className={`p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40 ${flatBorder}`}
-                              >
-                                {isProcessing
-                                  ? <Loader2 className="w-4 h-4 animate-spin" />
-                                  : <Undo2 className="w-4 h-4" />}
-                              </button>
+                          {/* 下段: メンバー · 時刻 ｜ 取り消し */}
+                          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-stone-100">
+                            {/* 左: メンバーと時刻をひとまとめ */}
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-stone-500">
+                              <span className={`w-2 h-2 rounded-full shrink-0 ${member?.color ?? 'bg-stone-300'}`} />
+                              <span>{isMe ? 'あなた' : (member?.displayName ?? '不明')}</span>
+                              <span className="text-stone-300">·</span>
+                              <span className="text-stone-400">{timeLabel}</span>
                             </div>
-                          )}
-                        </div>
+                            {/* 右: 日付変更・取り消しボタン（自分の実績のみ） */}
+                            {isMe && (
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={() => setEditing(item)}
+                                  disabled={processingId !== null}
+                                  title="日付を変更"
+                                  className={`p-1.5 rounded-lg text-stone-400 hover:text-brand-teal hover:bg-brand-teal/10 transition-colors disabled:opacity-40 ${flatBorder}`}
+                                >
+                                  <Calendar className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleCancel(item)}
+                                  disabled={processingId !== null}
+                                  title="取り消す"
+                                  className={`p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40 ${flatBorder}`}
+                                >
+                                  {isProcessing
+                                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                                    : <Undo2 className="w-4 h-4" />}
+                                </button>
+                              </div>
+                            )}
+                          </div>
                       </div>
                     </div>
                   );

@@ -138,36 +138,36 @@ export default function Negurai() {
               const isMyRecord = item.receiverSub === mySub;
               return (
                 <div key={item.neguraiId} className={`bg-white rounded-2xl p-3 ${flatBorder} shadow-[2px_2px_0px_#292524]`}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs text-stone-400 mb-0.5">
-                        <span className="font-bold text-stone-600">{getMemberName(item.giverSub)}</span>
-                        　→
-                        <span className="font-bold text-stone-600">{getMemberName(item.receiverSub)}</span>
-                        　{formatTimestamp(item.timestamp)}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-stone-400 mb-0.5">
+                          <span className="font-bold text-stone-600">{getMemberName(item.giverSub)}</span>
+                          　→
+                          <span className="font-bold text-stone-600">{getMemberName(item.receiverSub)}</span>
+                          　{formatTimestamp(item.timestamp)}
+                        </div>
+                        <div className="text-sm font-bold text-stone-800 truncate">{item.description}</div>
+                        <div className="flex items-center gap-1 mt-1 text-brand-rose">
+                          <Flame className="w-3.5 h-3.5" />
+                          <span className="text-xs font-black">{item.points} pt</span>
+                        </div>
                       </div>
-                      <div className="text-sm font-bold text-stone-800 truncate">{item.description}</div>
-                      <div className="flex items-center gap-1 mt-1 text-brand-rose">
-                        <Flame className="w-3.5 h-3.5" />
-                        <span className="text-xs font-black">{item.points} pt</span>
-                      </div>
+                      {isMyRecord && (
+                        <button
+                          onClick={() => deleteNegurai(item)}
+                          disabled={processingId === item.neguraiId}
+                          className={`p-1.5 rounded-lg border-2 border-stone-300 text-stone-400 hover:border-red-400 hover:text-red-400 transition-colors ${bounceClass}`}
+                          style={springStyle}
+                          aria-label="ねぎらいを取り消す"
+                        >
+                          {processingId === item.neguraiId ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
                     </div>
-                    {isMyRecord && (
-                      <button
-                        onClick={() => deleteNegurai(item)}
-                        disabled={processingId === item.neguraiId}
-                        className={`p-1.5 rounded-lg border-2 border-stone-300 text-stone-400 hover:border-red-400 hover:text-red-400 transition-colors ${bounceClass}`}
-                        style={springStyle}
-                        aria-label="ねぎらいを取り消す"
-                      >
-                        {processingId === item.neguraiId ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-4 h-4" />
-                        )}
-                      </button>
-                    )}
-                  </div>
                 </div>
               );
             })}

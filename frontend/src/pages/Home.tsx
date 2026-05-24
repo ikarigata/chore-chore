@@ -141,10 +141,12 @@ export default function Home() {
                   className={`flex flex-col items-center p-3 rounded-2xl ${flatBorder} bg-white ${bounceClass} shadow-[2px_2px_0px_#292524]`}
                   style={springStyle}
                 >
-                  <div className={`w-10 h-10 rounded-full ${cat.color} ${flatBorder} flex items-center justify-center mb-2`}>
-                    <cat.icon className="w-5 h-5 text-stone-800" />
+                  <div className="flex flex-col items-center w-full">
+                    <div className={`w-10 h-10 rounded-full ${cat.color} ${flatBorder} flex items-center justify-center mb-2`}>
+                      <cat.icon className="w-5 h-5 text-stone-800" />
+                    </div>
+                    <span className="font-bold text-xs">{cat.name}</span>
                   </div>
-                  <span className="font-bold text-xs">{cat.name}</span>
                 </button>
               ))}
             </div>
@@ -176,27 +178,29 @@ export default function Home() {
 
             {taskMasters.filter(t => t.categoryId === selectedCategory).map(task => (
               <div key={task.taskId} className={`bg-white p-3 rounded-2xl ${flatBorder} flex items-center justify-between shadow-[2px_2px_0px_#292524]`}>
-                <div>
-                  <div className="font-bold">{task.taskName}</div>
-                  <div className="text-sm font-black text-brand-yellow flex items-center gap-1">
-                    <Flame className="w-4 h-4" /> {task.points} pt
+                <div className="flex items-center justify-between w-full">
+                  <div>
+                    <div className="font-bold">{task.taskName}</div>
+                    <div className="text-sm font-black text-brand-yellow flex items-center gap-1">
+                      <Flame className="w-4 h-4" /> {task.points} pt
+                    </div>
                   </div>
+                  <button
+                    onClick={() => createTaskHistory(task, { dateKey: selectedDateKey })}
+                    disabled={processingId !== null}
+                    className={`bg-brand-teal text-white px-4 py-2 rounded-3xl font-bold ${flatBorder} flex items-center gap-1 transition-all ${processingId === task.taskId ? 'opacity-80 scale-95' : bounceClass}`}
+                    style={springStyle}
+                  >
+                    {processingId === task.taskId ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        <Check className="w-5 h-5" />
+                        やった！
+                      </>
+                    )}
+                  </button>
                 </div>
-                <button
-                  onClick={() => createTaskHistory(task, { dateKey: selectedDateKey })}
-                  disabled={processingId !== null}
-                  className={`bg-brand-teal text-white px-4 py-2 rounded-3xl font-bold ${flatBorder} flex items-center gap-1 transition-all ${processingId === task.taskId ? 'opacity-80 scale-95' : bounceClass}`}
-                  style={springStyle}
-                >
-                  {processingId === task.taskId ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      <Check className="w-5 h-5" />
-                      やった！
-                    </>
-                  )}
-                </button>
               </div>
             ))}
 
