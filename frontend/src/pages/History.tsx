@@ -95,7 +95,7 @@ export default function History() {
               </div>
 
               {/* その日の履歴一覧 */}
-              <div className="space-y-3 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-stone-300 before:to-transparent">
+              <div className="space-y-2 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-stone-300 before:to-transparent">
                 {items.map(item => {
                   const categoryId = taskMasters.find(t => t.taskId === item.taskId)?.categoryId;
                   const cat = (CATEGORIES.find(c => c.id === categoryId) ?? CATEGORIES.find(c => c.id === 'other'))!;
@@ -110,14 +110,14 @@ export default function History() {
                     hour12: false,
                   }).format(ts);
                   return (
-                    <div key={item.taskExecutionId} className="relative flex items-start gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div key={item.taskExecutionId} className="relative flex items-start gap-2.5 animate-in fade-in slide-in-from-bottom-4 duration-300">
                       {/* カテゴリアイコン（カテゴリ背景色で種類を一目で識別） */}
-                      <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 border-stone-800 ${cat.color} shadow shrink-0 z-10`}>
-                        <cat.icon className="w-5 h-5 text-stone-700" />
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 border-stone-800 ${cat.color} shadow shrink-0 z-10`}>
+                        <cat.icon className="w-4 h-4 text-stone-700" />
                       </div>
 
                       {/* カード */}
-                      <div className={`flex-1 p-3 rounded-2xl bg-white ${flatBorder} shadow-[2px_2px_0px_#292524]`}>
+                      <div className={`flex-1 px-3 py-2 rounded-2xl bg-white ${flatBorder} shadow-[2px_2px_0px_#292524]`}>
                         {/* 上段: 家事名 + ポイントバッジ */}
                         <div className="flex justify-between items-start gap-2">
                           <span className="font-bold text-sm leading-snug flex-1">
@@ -128,7 +128,7 @@ export default function History() {
                           </span>
                         </div>
                         {/* 下段: メンバー · 時刻 ｜ 取り消し */}
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-stone-100">
+                        <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-stone-100">
                           {/* 左: メンバーと時刻をひとまとめ */}
                           <div className="flex items-center gap-1.5 text-[11px] font-bold text-stone-500">
                             <span className={`w-2 h-2 rounded-full shrink-0 ${member?.color ?? 'bg-stone-300'}`} />
