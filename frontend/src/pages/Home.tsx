@@ -185,7 +185,7 @@ export default function Home() {
                 <button
                   onClick={() => createTaskHistory(task, { dateKey: selectedDateKey })}
                   disabled={processingId !== null}
-                  className={`bg-brand-teal text-white px-4 py-2 rounded-full font-bold ${flatBorder} flex items-center gap-1 transition-all ${processingId === task.taskId ? 'opacity-80 scale-95' : bounceClass}`}
+                  className={`bg-brand-teal text-white px-4 py-2 rounded-3xl font-bold ${flatBorder} flex items-center gap-1 transition-all ${processingId === task.taskId ? 'opacity-80 scale-95' : bounceClass}`}
                   style={springStyle}
                 >
                   {processingId === task.taskId ? (
