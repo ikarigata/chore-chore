@@ -9,7 +9,7 @@ interface Props {
 
 export default function UserScore({ user, dailyPoints, weeklyPoints }: Props) {
   return (
-    <div className={`flex-1 rounded-xl p-3 bg-white ${flatBorder}`}>
+    <div className={`flex-1 rounded-2xl p-3 bg-white ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
       {/* ユーザー名 */}
       <div className="flex items-center gap-1.5 mb-2.5">
         <div className={`w-2.5 h-2.5 rounded-full ${user.color} ${flatBorder}`} />

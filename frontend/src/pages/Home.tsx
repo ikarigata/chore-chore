@@ -43,19 +43,20 @@ export default function Home() {
 
   return (
     <div className="p-4 space-y-6">
-      {/* ダッシュボード */}
-      <section className={`bg-white rounded-2xl p-4 ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
-        <div className="flex gap-2 w-full mb-4">
-          {members.map(m => {
-            const daily = todaySummaries.find(s => s.cognitoSub === m.cognitoSub)?.dailyPoints ?? 0;
-            const weekly = dates.reduce((sum, date) =>
-              sum + (weeklySummaries.find(s => s.cognitoSub === m.cognitoSub && s.date === date)?.dailyPoints ?? 0)
-            , 0);
-            return <UserScore key={m.cognitoSub} user={m} dailyPoints={daily} weeklyPoints={weekly} />;
-          })}
-        </div>
+      {/* メンバー別サマリ（横並びカード） */}
+      <div className="flex gap-3">
+        {members.map(m => {
+          const daily = todaySummaries.find(s => s.cognitoSub === m.cognitoSub)?.dailyPoints ?? 0;
+          const weekly = dates.reduce((sum, date) =>
+            sum + (weeklySummaries.find(s => s.cognitoSub === m.cognitoSub && s.date === date)?.dailyPoints ?? 0)
+          , 0);
+          return <UserScore key={m.cognitoSub} user={m} dailyPoints={daily} weeklyPoints={weekly} />;
+        })}
+      </div>
 
-        <div className="border-t-2 border-stone-100 pt-3">
+      {/* 週間グラフカード */}
+      <section className={`bg-white rounded-2xl p-4 ${flatBorder} shadow-[4px_4px_0px_#292524]`}>
+        <div>
           {/* チャート全体（Y軸ラベルは絶対配置でオーバーレイ） */}
           <div className="relative">
             {/* Y軸ラベル（絶対配置 — レイアウトに影響しない） */}
