@@ -337,6 +337,63 @@ DynamoDBの `PutItem` は、データが存在しなければ「作成」、存�
 
 ---
 
+### 2.15. メモ一覧API
+
+- **エンドポイント**: `GET /memos`
+- **目的**: 家族の共有メモを新しい順に取得します。
+- **リクエストボディ**: なし
+- **レスポンス**:
+    ```json
+    {
+      "memos": [
+        {
+          "memoId": "...",
+          "authorSub": "...",
+          "content": "牛乳買う",
+          "timestamp": "2026-05-25T10:00:00.000Z",
+          "expiresAt": 1751234567
+        }
+      ]
+    }
+    ```
+* **DynamoDB操作**: `Query` — SK: `begins_with('MEMO#')`、`ScanIndexForward: false`（新しい順）
+
+### 2.16. メモ作成API
+
+- **エンドポイント**: `POST /memos`
+- **リクエストボディ**:
+    ```json
+    { "memoId": "<フロントで発行したUUID>", "content": "牛乳買う" }
+    ```
+    * `memoId`: 冪等性担保のためフロントエンドで発行する UUID。
+    * `content`: 1〜500 文字（前後の空白は trim する）。
+* **レスポンス**: `200 { "message": "メモを追加しました" }`
+* **エラー**:
+    * `400` 必須フィールド欠落 / `content` が空または 500 文字超
+    * `409` 同一 `memoId` で既に記録済み（冪等リトライの安全な弾き）
+* **DynamoDB操作**: `PutItem`
+    * SK: `MEMO#{RFC3339Timestamp}#{MemoID}`、条件: `attribute_not_exists(DataSortKey)`
+    * `ExpiresAt` = 現在時刻 + 30日（UNIX 秒）
+    * `AuthorSub` = `ctx.cognitoSub`（JWT から取得）
+
+### 2.17. メモ削除API
+
+- **エンドポイント**: `DELETE /memos`
+- **目的**: 不要になったメモを削除します。家族全員が削除可能です。
+- **リクエストボディ**:
+    ```json
+    { "memoId": "<削除するメモのUUID>", "timestamp": "<メモのRFC3339時刻>" }
+    ```
+* **レスポンス**: `200 { "message": "メモを削除しました" }`
+* **エラー**:
+    * `400` 必須フィールド欠落
+    * `404` 対象のメモが見つからない（既に削除済み、TTL で期限切れ等）
+* **DynamoDB操作**: `DeleteItem`
+    * SK: `MEMO#{timestamp}#{memoId}`、条件: `attribute_exists(DataSortKey)`
+    * 権限チェックなし（家族全員削除可）
+
+---
+
 ### 💡 「家事実績の更新」についてのベストプラクティス
 
 モダンなシステム設計（特にポイントやお金が絡む履歴データ）においては、**「一度記録された家事実績（HISTORY）は直接編集（Update）させない」**のが鉄則です。

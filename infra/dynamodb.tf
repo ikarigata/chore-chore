@@ -5,7 +5,9 @@
 #   USER#{CognitoSub}                                — ユーザー情報・累積ポイント
 #   TASK#{TaskID}                                    — 家事マスター設定
 #   DAILY#{YYYY-MM-DD}#{CognitoSub}                 — 日次サマリ (TTL: 90日)
-#   HISTORY#{RFC3339}#{CognitoSub}#{TaskExecutionID} — タスク履歴 (TTL: 1年)
+#   HISTORY#{RFC3339}#{CognitoSub}#{TaskExecutionID} — 家事実績 (TTL: 1年)
+#   NEGURAI#{RFC3339}#{NeguraiID}                   — ねぎらい記録 (TTL: 1年)
+#   MEMO#{RFC3339}#{MemoID}                          — 家族共有メモ (TTL: 30日)
 
 resource "aws_dynamodb_table" "family_app" {
   name         = local.family_app_table_name

@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import type { User as SharedUser, TaskMaster as SharedTaskMaster, DailySummary as SharedDailySummary, TaskHistory as SharedTaskHistory, Negurai as SharedNegurai } from '@iezi/shared';
+import type { User as SharedUser, TaskMaster as SharedTaskMaster, DailySummary as SharedDailySummary, TaskHistory as SharedTaskHistory, Negurai as SharedNegurai, Memo as SharedMemo } from '@iezi/shared';
 
 export interface User extends SharedUser {
   color: string; // assigned client-side for visual differentiation
@@ -12,6 +12,8 @@ export type DailySummary = SharedDailySummary;
 export type TaskHistory = SharedTaskHistory;
 
 export type Negurai = SharedNegurai;
+
+export type Memo = SharedMemo;
 
 export interface Category {
   id: string;

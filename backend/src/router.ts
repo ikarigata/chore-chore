@@ -4,6 +4,9 @@ import { familyInitHandler } from './handlers/familyInit.js'
 import { familyInviteHandler } from './handlers/familyInvite.js'
 import { familyJoinHandler } from './handlers/familyJoin.js'
 import { historiesHandler } from './handlers/histories.js'
+import { memoCreateHandler } from './handlers/memoCreate.js'
+import { memoDeleteHandler } from './handlers/memoDelete.js'
+import { memoListHandler } from './handlers/memoList.js'
 import { neguraiCreateHandler } from './handlers/neguraiCreate.js'
 import { neguraiDeleteHandler } from './handlers/neguraiDelete.js'
 import { neguraiListHandler } from './handlers/neguraiList.js'
@@ -51,6 +54,15 @@ export async function route(
 
     case 'GET /histories':
       return historiesHandler(ctx, req, deps)
+
+    case 'GET /memos':
+      return memoListHandler(ctx, req, deps)
+
+    case 'POST /memos':
+      return memoCreateHandler(ctx, req, deps)
+
+    case 'DELETE /memos':
+      return memoDeleteHandler(ctx, req, deps)
 
     case 'GET /negurai':
       return neguraiListHandler(ctx, req, deps)

@@ -14,6 +14,8 @@ import type {
   CreateTaskHistoryInput,
   CreateNeguraiInput,
   DeleteNeguraiInput,
+  CreateMemoInput,
+  DeleteMemoInput,
   IFamilyRepository,
   UpsertTaskMasterInput,
 } from '../IFamilyRepository.js'
@@ -21,6 +23,7 @@ import type {
   CognitoSub,
   DailySummary,
   FamilyID,
+  Memo,
   Negurai,
   TaskHistory,
   TaskID,
@@ -84,6 +87,20 @@ function parseDailySummary(item: DynamoItem): DailySummary {
     date: withoutPrefix.slice(0, sep),
     cognitoSub: withoutPrefix.slice(sep + 1),
     dailyPoints: (item['DailyPoints'] as number) ?? 0,
+  }
+}
+
+function parseMemo(item: DynamoItem): Memo {
+  // SK: MEMO#{RFC3339Timestamp}#{MemoID}
+  const sk = item['DataSortKey'] as string
+  const withoutPrefix = sk.slice('MEMO#'.length)
+  const sep = withoutPrefix.indexOf('#')
+  return {
+    memoId: withoutPrefix.slice(sep + 1),
+    timestamp: withoutPrefix.slice(0, sep),
+    authorSub: item['AuthorSub'] as string,
+    content: item['Content'] as string,
+    expiresAt: item['ExpiresAt'] as number,
   }
 }
 
@@ -468,6 +485,70 @@ export class DynamoFamilyRepository implements IFamilyRepository {
           (r) => r.Code === 'ConditionalCheckFailed',
         )
         if (hasDuplicate) throw new AppError(409, 'このねぎらいは既に記録されています')
+      }
+      throw err
+    }
+  }
+
+  async listMemos(familyId: FamilyID): Promise<Memo[]> {
+    const items: DynamoItem[] = []
+    let lastKey: Record<string, unknown> | undefined
+
+    do {
+      const result = await this.client.send(
+        new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: 'FamilyID = :pk AND begins_with(DataSortKey, :prefix)',
+          ExpressionAttributeValues: { ':pk': familyId, ':prefix': 'MEMO#' },
+          ScanIndexForward: false,
+          ExclusiveStartKey: lastKey,
+        }),
+      )
+      items.push(...((result.Items ?? []) as DynamoItem[]))
+      lastKey = result.LastEvaluatedKey as Record<string, unknown> | undefined
+    } while (lastKey)
+
+    return items.map((item) => parseMemo(item))
+  }
+
+  async createMemo(familyId: FamilyID, authorSub: CognitoSub, input: CreateMemoInput): Promise<void> {
+    try {
+      await this.client.send(
+        new PutCommand({
+          TableName: TABLE_NAME,
+          Item: {
+            FamilyID: familyId,
+            DataSortKey: `MEMO#${input.timestamp}#${input.memoId}`,
+            AuthorSub: authorSub,
+            Content: input.content,
+            ExpiresAt: input.expiresAt,
+          },
+          ConditionExpression: 'attribute_not_exists(DataSortKey)',
+        }),
+      )
+    } catch (err) {
+      if ((err as { name?: string }).name === 'ConditionalCheckFailedException') {
+        throw new AppError(409, 'このメモは既に記録されています')
+      }
+      throw err
+    }
+  }
+
+  async deleteMemo(familyId: FamilyID, input: DeleteMemoInput): Promise<void> {
+    try {
+      await this.client.send(
+        new DeleteCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            FamilyID: familyId,
+            DataSortKey: `MEMO#${input.timestamp}#${input.memoId}`,
+          },
+          ConditionExpression: 'attribute_exists(DataSortKey)',
+        }),
+      )
+    } catch (err) {
+      if ((err as { name?: string }).name === 'ConditionalCheckFailedException') {
+        throw new AppError(404, '対象のメモが見つかりません')
       }
       throw err
     }

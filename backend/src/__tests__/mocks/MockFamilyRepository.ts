@@ -3,6 +3,8 @@ import type {
   CreateTaskHistoryInput,
   CreateNeguraiInput,
   DeleteNeguraiInput,
+  CreateMemoInput,
+  DeleteMemoInput,
   IFamilyRepository,
   UpsertTaskMasterInput,
 } from '../../repositories/IFamilyRepository.js'
@@ -10,6 +12,7 @@ import type {
   CognitoSub,
   DailySummary,
   FamilyID,
+  Memo,
   Negurai,
   TaskHistory,
   TaskID,
@@ -106,5 +109,25 @@ export class MockFamilyRepository implements IFamilyRepository {
 
   async deleteNegurai(familyId: FamilyID, receiverSub: CognitoSub, input: DeleteNeguraiInput): Promise<void> {
     this.deleteNeguraiCalls.push([familyId, receiverSub, input])
+  }
+
+  memoList: Memo[] = []
+  createMemoCalls: Array<[FamilyID, CognitoSub, CreateMemoInput]> = []
+  deleteMemoCalls: Array<[FamilyID, DeleteMemoInput]> = []
+  createMemoError?: Error
+  deleteMemoError?: Error
+
+  async listMemos(_familyId: FamilyID): Promise<Memo[]> {
+    return this.memoList
+  }
+
+  async createMemo(familyId: FamilyID, authorSub: CognitoSub, input: CreateMemoInput): Promise<void> {
+    this.createMemoCalls.push([familyId, authorSub, input])
+    if (this.createMemoError) throw this.createMemoError
+  }
+
+  async deleteMemo(familyId: FamilyID, input: DeleteMemoInput): Promise<void> {
+    this.deleteMemoCalls.push([familyId, input])
+    if (this.deleteMemoError) throw this.deleteMemoError
   }
 }

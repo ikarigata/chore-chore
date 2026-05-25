@@ -105,6 +105,28 @@ export const NeguraiDeleteRequestSchema = z.object({
 
 export const NeguraiListResponseSchema = z.object({
   negurai: z.array(NeguraiSchema),
+})
+
+export const MemoSchema = z.object({
+  memoId: z.string(),
+  authorSub: z.string(),
+  content: z.string(),
+  timestamp: z.string(),
+  expiresAt: z.number(),
+})
+
+export const MemoCreateRequestSchema = z.object({
+  memoId: z.string().uuid(),
+  content: z.string().trim().min(1).max(500),
+})
+
+export const MemoDeleteRequestSchema = z.object({
+  memoId: z.string().uuid(),
+  timestamp: z.string(),
+})
+
+export const MemoListResponseSchema = z.object({
+  memos: z.array(MemoSchema),
 });
 
 export const UserUpdateRequestSchema = z
@@ -149,6 +171,10 @@ export type TaskHistoryDeleteRequest = z.infer<typeof TaskHistoryDeleteRequestSc
 export type NeguraiCreateRequest = z.infer<typeof NeguraiCreateRequestSchema>;
 export type NeguraiDeleteRequest = z.infer<typeof NeguraiDeleteRequestSchema>;
 export type NeguraiListResponse = z.infer<typeof NeguraiListResponseSchema>;
+export type Memo = z.infer<typeof MemoSchema>;
+export type MemoCreateRequest = z.infer<typeof MemoCreateRequestSchema>;
+export type MemoDeleteRequest = z.infer<typeof MemoDeleteRequestSchema>;
+export type MemoListResponse = z.infer<typeof MemoListResponseSchema>;
 export type UserUpdateRequest = z.infer<typeof UserUpdateRequestSchema>;
 export type FamilyCreateRequest = z.infer<typeof FamilyCreateRequestSchema>;
 export type FamilyJoinRequest = z.infer<typeof FamilyJoinRequestSchema>;

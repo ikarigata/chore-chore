@@ -74,6 +74,18 @@
   - `Points` (Number): 付与ポイント数
   - `ExpiresAt` (Number): TTL用UNIXタイムスタンプ（1年後）
 
+### ⑥ メモ (`MEMO`)
+家族が「近いうちにやらなきゃ」「あれ買わなきゃ」といった短いメモを共有するためのデータです。
+- **SK形式**: `MEMO#{RFC3339Timestamp}#{MemoID}`
+  - `RFC3339Timestamp`: サーバー受信時刻（バックデート不可）。
+  - `MemoID`: 冪等性担保のためフロントエンドで発行した UUID。
+- **主要属性**:
+  - `AuthorSub` (String): 投稿者の CognitoSub
+  - `Content` (String): メモ本文（1〜500 文字）
+  - `ExpiresAt` (Number): TTL 用 UNIX タイムスタンプ（30日後）
+- **削除権限**: 家族全員が削除可（`AuthorSub` チェックなし）
+- **冪等性**: `PutItem` に `attribute_not_exists(DataSortKey)` 条件を付与
+
 ---
 
 ## 3. アクセスパターンとコアロジック

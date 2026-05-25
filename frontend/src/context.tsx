@@ -2,17 +2,19 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, ty
 import { fetchAuthSession } from 'aws-amplify/auth';
 import {
   FamilyInitResponseSchema,
+  MemoListResponseSchema,
   NeguraiListResponseSchema,
   SummaryDailyResponseSchema,
   SummaryWeeklyResponseSchema,
   TaskHistoryListResponseSchema,
   type FamilyInitResponse,
+  type MemoListResponse,
   type NeguraiListResponse,
   type SummaryDailyResponse,
   type SummaryWeeklyResponse,
   type TaskHistoryListResponse,
 } from '@iezi/shared';
-import type { User, TaskMaster, TaskHistory, DailySummary, Negurai } from './types';
+import type { User, TaskMaster, TaskHistory, DailySummary, Negurai, Memo } from './types';
 import { apiGet, apiPost, apiPut, apiDelete } from './lib/api';
 import { dateKeyToTimestamp, getJSTDateString } from './lib/time';
 
@@ -43,6 +45,7 @@ interface AppContextType {
   todaySummaries: DailySummary[];
   weeklySummaries: DailySummary[];
   negurai: Negurai[];
+  memos: Memo[];
   updateMyProfile: (patch: { displayName?: string; icon?: string }) => Promise<void>;
   upsertTaskMaster: (task: TaskMaster) => Promise<void>;
   deleteTaskMaster: (taskId: string) => Promise<void>;
@@ -51,6 +54,8 @@ interface AppContextType {
   updateTaskHistoryDate: (item: TaskHistory, newDateKey: string) => Promise<void>;
   createNegurai: (giverSub: string, description: string, points: number) => Promise<void>;
   deleteNegurai: (item: Negurai) => Promise<void>;
+  createMemo: (content: string) => Promise<void>;
+  deleteMemo: (item: Memo) => Promise<void>;
   processingId: string | null;
   initialized: boolean;
   initError: string | null;
@@ -66,6 +71,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [todaySummaries, setTodaySummaries] = useState<DailySummary[]>([]);
   const [weeklySummaries, setWeeklySummaries] = useState<DailySummary[]>([]);
   const [negurai, setNegurai] = useState<Negurai[]>([]);
+  const [memos, setMemos] = useState<Memo[]>([]);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
@@ -73,12 +79,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const refreshAllData = useCallback(async () => {
     const token = ++refreshTokenRef.current;
-    const [initData, summaryData, weeklyData, historiesData, neguraiData] = await Promise.all([
+    const [initData, summaryData, weeklyData, historiesData, neguraiData, memosData] = await Promise.all([
       apiGet<FamilyInitResponse>('/family/init', FamilyInitResponseSchema),
       apiGet<SummaryDailyResponse>('/summary/daily', SummaryDailyResponseSchema),
       apiGet<SummaryWeeklyResponse>('/summary/weekly', SummaryWeeklyResponseSchema),
       apiGet<TaskHistoryListResponse>('/histories', TaskHistoryListResponseSchema),
       apiGet<NeguraiListResponse>('/negurai', NeguraiListResponseSchema),
+      apiGet<MemoListResponse>('/memos', MemoListResponseSchema),
     ]);
     if (token !== refreshTokenRef.current) return;
     setMembers(prev => assignMemberColors(initData.users, prev));
@@ -87,6 +94,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setWeeklySummaries(weeklyData.summaries);
     setTaskHistories(historiesData.taskHistories);
     setNegurai(neguraiData.negurai);
+    setMemos(memosData.memos);
   }, []);
 
   useEffect(() => {
@@ -215,6 +223,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const createMemo = async (content: string) => {
+    if (processingId || !mySub) return;
+    const memoId = crypto.randomUUID();
+    setProcessingId('memo-create');
+    try {
+      await apiPost('/memos', { memoId, content });
+      await refreshAllData();
+    } catch (err) {
+      console.error('メモの追加に失敗しました', err);
+      throw err;
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const deleteMemo = async (item: Memo) => {
+    if (processingId || !mySub) return;
+    setProcessingId(item.memoId);
+    try {
+      await apiDelete('/memos', { memoId: item.memoId, timestamp: item.timestamp });
+      await refreshAllData();
+    } catch (err) {
+      console.error('メモの削除に失敗しました', err);
+      throw err;
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   // 家事実績の日付編集は spec の鉄則どおり「削除→再登録（新 UUID）」の2段で行う
   const updateTaskHistoryDate = async (item: TaskHistory, newDateKey: string) => {
     if (processingId || !mySub) return;
@@ -257,6 +294,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       todaySummaries,
       weeklySummaries,
       negurai,
+      memos,
       updateMyProfile,
       upsertTaskMaster,
       deleteTaskMaster,
@@ -265,6 +303,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateTaskHistoryDate,
       createNegurai,
       deleteNegurai,
+      createMemo,
+      deleteMemo,
       processingId,
       initialized,
       initError

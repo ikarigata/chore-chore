@@ -2,6 +2,8 @@ import type {
   CognitoSub,
   DailySummary,
   FamilyID,
+  Memo,
+  MemoID,
   Negurai,
   NeguraiID,
   TaskExecutionID,
@@ -51,6 +53,18 @@ export interface DeleteNeguraiInput {
   points: number
 }
 
+export interface CreateMemoInput {
+  memoId: MemoID
+  content: string
+  timestamp: string
+  expiresAt: number
+}
+
+export interface DeleteMemoInput {
+  memoId: MemoID
+  timestamp: string
+}
+
 export interface IFamilyRepository {
   listFamilyMembers(familyId: FamilyID): Promise<User[]>
   listTaskMasters(familyId: FamilyID): Promise<TaskMaster[]>
@@ -69,4 +83,7 @@ export interface IFamilyRepository {
   listNegurai(familyId: FamilyID): Promise<Negurai[]>
   createNegurai(familyId: FamilyID, receiverSub: CognitoSub, input: CreateNeguraiInput): Promise<void>
   deleteNegurai(familyId: FamilyID, receiverSub: CognitoSub, input: DeleteNeguraiInput): Promise<void>
+  listMemos(familyId: FamilyID): Promise<Memo[]>
+  createMemo(familyId: FamilyID, authorSub: CognitoSub, input: CreateMemoInput): Promise<void>
+  deleteMemo(familyId: FamilyID, input: DeleteMemoInput): Promise<void>
 }

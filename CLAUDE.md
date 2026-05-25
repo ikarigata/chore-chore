@@ -16,6 +16,7 @@
 | **家事実績** | 家事を実際に実行したという履歴ログ。誰がいつどの家事をして何ポイント獲得したか。 | `TaskHistory` | SK: `HISTORY#{RFC3339Timestamp}#{CognitoSub}#{TaskExecutionID}` | `taskExecutionId`, `taskId`, `points`, `timestamp` |
 | **家事カテゴリ** | 「料理」「掃除」「洗濯」など、家事を分類するためのタグ。家事の属性。 | `categoryId` | `TASK#` レコードの `Category` 属性 | `categoryId` |
 | **日次サマリ** | 「今日誰が何ポイント稼いだか」を即座に表示するためのホットデータ。 | `DailySummary` | SK: `DAILY#{YYYY-MM-DD}#{CognitoSub}` | `date`, `cognitoSub`, `dailyPoints` |
+| **メモ** | 「近いうちにやらなきゃ」「あれ買わなきゃ」などを家族間で共有する短いメモ。ポイント操作なし。 | `Memo` | SK: `MEMO#{RFC3339Timestamp}#{MemoID}` | `memoId`, `authorSub`, `content` |
 
 - 「家事を完了する」=「家事実績を作成する」（= `POST /tasks/execute`）
 - 「家事実績を取り消す」=「誤って記録した家事実績を削除し、加算ポイントを減算する」（= `DELETE /tasks/execute`）

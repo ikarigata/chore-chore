@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { HandHeart, Home, ScrollText, Settings, Sparkles } from 'lucide-react'
+import { HandHeart, Home, ScrollText, Settings, Sparkles, StickyNote } from 'lucide-react'
 import NavButton from './NavButton'
 import QrModal from './QrModal'
 import { useApp } from '../context'
@@ -17,7 +17,7 @@ export default function Layout() {
   const { members, mySub, initialized, initError } = useApp()
 
   const path = location.pathname
-  const activeTab = path === '/history' ? 'history' : path === '/settings' ? 'settings' : path === '/negurai' ? 'negurai' : 'home'
+  const activeTab = path === '/history' ? 'history' : path === '/settings' ? 'settings' : path === '/negurai' ? 'negurai' : path === '/memo' ? 'memo' : 'home'
   const myName = members.find(m => m.cognitoSub === mySub)?.displayName ?? ''
 
   if (!initialized) {
@@ -61,8 +61,9 @@ export default function Layout() {
         <Outlet context={{ onOpenQr: () => setShowQrModal(true) } satisfies LayoutOutletContext} />
       </main>
 
-      <nav className="fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 bg-white border-t-2 border-stone-800 flex justify-around p-3 z-20">
+      <nav className="fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 bg-white border-t-2 border-stone-800 flex justify-around p-2 z-20">
         <NavButton icon={Home} label="ホーム" active={activeTab === 'home'} onClick={() => navigate('/')} />
+        <NavButton icon={StickyNote} label="メモ" active={activeTab === 'memo'} onClick={() => navigate('/memo')} />
         <NavButton icon={ScrollText} label="履歴" active={activeTab === 'history'} onClick={() => navigate('/history')} />
         <NavButton icon={HandHeart} label="ねぎらい" active={activeTab === 'negurai'} onClick={() => navigate('/negurai')} />
         <NavButton icon={Settings} label="設定" active={activeTab === 'settings'} onClick={() => navigate('/settings')} />

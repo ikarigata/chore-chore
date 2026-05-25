@@ -1,12 +1,13 @@
-import type { User, TaskMaster, DailySummary, TaskHistory, Negurai } from '@iezi/shared'
+import type { User, TaskMaster, DailySummary, TaskHistory, Negurai, Memo } from '@iezi/shared'
 
 export type FamilyID = string
 export type CognitoSub = string
 export type TaskID = string
 export type TaskExecutionID = string
 export type NeguraiID = string
+export type MemoID = string
 
-export { User, TaskMaster, DailySummary, TaskHistory, Negurai }
+export { User, TaskMaster, DailySummary, TaskHistory, Negurai, Memo }
 
 export interface RequestContext {
   familyId: FamilyID
