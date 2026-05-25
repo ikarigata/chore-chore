@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm test *)",
+      "Bash(npm run *)",
+      "Bash(terraform fmt)",
+      "Bash(terraform validate *)",
+      "Bash(xargs cat)",
+      "Bash(cat)",
+      "Bash(chmod +x /tmp/api_check.sh)",
+      "Bash(/tmp/api_check.sh)",
+      "Bash(npx vitest *)",
+      "Bash(npx tsc *)",
+      "Bash(AWS_PROFILE=terraform aws dynamodb query --table-name iezi-dev-FamilyAppTable --key-condition-expression 'FamilyID = :fid' --expression-attribute-values '{\":fid\":{\"S\":\"fam_e555a2b1-4fcf-4620-b044-85de3a849cb5\"}}' --projection-expression 'DataSortKey, GiverSub, ReceiverSub' --output json)"
+    ]
+  }
+}

@@ -43,6 +43,25 @@ resource "aws_cloudfront_distribution" "frontend" {
     max_ttl     = 300 # 5分
   }
 
+  # sw.js は絶対にキャッシュしない（Service Worker の更新を即時反映するため）
+  ordered_cache_behavior {
+    path_pattern           = "/sw.js"
+    target_origin_id       = "s3-frontend"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    compress               = true
+
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+
+    min_ttl     = 0
+    default_ttl = 0
+    max_ttl     = 0
+  }
+
   # ハッシュ付き静的アセット（JS/CSS）は長期キャッシュ
   ordered_cache_behavior {
     path_pattern           = "/assets/*"
