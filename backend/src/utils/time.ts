@@ -1,6 +1,6 @@
 const ONE_YEAR_SECONDS = 365 * 24 * 60 * 60
 const NINETY_DAYS_SECONDS = 90 * 24 * 60 * 60
-const THIRTY_DAYS_SECONDS = 30 * 24 * 60 * 60
+const SIXTY_DAYS_SECONDS = 60 * 24 * 60 * 60
 
 // sv-SE ロケールは YYYY-MM-DD 形式を返す
 export function getJSTDateString(date: Date): string {
@@ -20,5 +20,5 @@ export function dailySummaryExpiresAt(): number {
 }
 
 export function memoExpiresAt(): number {
-  return unixSecondsFromNow(THIRTY_DAYS_SECONDS)
+  return unixSecondsFromNow(SIXTY_DAYS_SECONDS)
 }
