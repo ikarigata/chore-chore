@@ -17,7 +17,7 @@ export default function DayCell({ dayNumber, isCurrentMonth, isToday, activeMemb
   return (
     <div
       className={[
-        'aspect-square flex flex-col items-center justify-between p-1 rounded-md',
+        'aspect-[5/6] flex flex-col items-center justify-between p-1 rounded-md',
         isCurrentMonth ? 'bg-white' : 'bg-stone-50 opacity-40',
         isToday ? 'ring-2 ring-brand-teal' : '',
       ].join(' ')}
@@ -29,7 +29,7 @@ export default function DayCell({ dayNumber, isCurrentMonth, isToday, activeMemb
         {visible.map(m => (
           <span
             key={m.cognitoSub}
-            className={`w-2 h-2 rounded-full ${m.color} ${flatBorder} border`}
+            className={`w-2.5 h-2.5 rounded-full ${m.color} ${flatBorder} border`}
             title={m.displayName}
           />
         ))}
