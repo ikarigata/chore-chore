@@ -58,9 +58,9 @@ export default function UserScore({ user, dailyPoints, weeklyPoints }: Props) {
 
         {/* ねぎらい累計 */}
         <div className="flex items-center justify-between mt-1">
-          <span className="text-[10px] font-bold text-brand-rose">ねぎらい</span>
+          <span className="text-[10px] font-bold text-brand-sky">ねぎらい</span>
           <div className="flex items-baseline gap-0.5">
-            <span className="text-sm font-black text-brand-rose">{(user.neguraiPoints ?? 0).toLocaleString()}</span>
+            <span className="text-sm font-black text-brand-sky">{(user.neguraiPoints ?? 0).toLocaleString()}</span>
             <span className="text-[10px] font-bold text-stone-400">pt</span>
           </div>
         </div>

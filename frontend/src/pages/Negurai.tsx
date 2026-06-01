@@ -55,7 +55,7 @@ export default function Negurai() {
       {/* ヘッダー説明 */}
       <section>
         <h2 className="text-lg font-black mb-1 flex items-center gap-2">
-          <HandHeart className="w-5 h-5 text-brand-rose" />
+          <HandHeart className="w-5 h-5 text-brand-sky" />
           ねぎらいを記録する
         </h2>
         <p className="text-xs text-stone-500 leading-relaxed">
@@ -110,7 +110,7 @@ export default function Negurai() {
           <button
             type="submit"
             disabled={submitting || !partner}
-            className={`w-full bg-brand-rose text-white py-3 rounded-xl font-black ${flatBorder} flex items-center justify-center gap-2 shadow-[2px_2px_0px_#292524] ${submitting ? 'opacity-70' : bounceClass}`}
+            className={`w-full bg-brand-sky text-white py-3 rounded-xl font-black ${flatBorder} flex items-center justify-center gap-2 shadow-[2px_2px_0px_#292524] ${submitting ? 'opacity-70' : bounceClass}`}
             style={springStyle}
           >
             {submitting ? (
@@ -147,7 +147,7 @@ export default function Negurai() {
                           　{formatTimestamp(item.timestamp)}
                         </div>
                         <div className="text-sm font-bold text-stone-800 truncate">{item.description}</div>
-                        <div className="flex items-center gap-1 mt-1 text-brand-rose">
+                        <div className="flex items-center gap-1 mt-1 text-brand-sky">
                           <Flame className="w-3.5 h-3.5" />
                           <span className="text-xs font-black">{item.points} pt</span>
                         </div>
