@@ -63,8 +63,12 @@ describe('taskExecuteHandler', () => {
   })
 
   it('timestamp が指定された場合その値を使って HISTORY と DAILY を組み立てる', async () => {
-    // JST 2026-05-22 21:00 = UTC 2026-05-22 12:00
-    const backdatedIso = '2026-05-22T12:00:00.000Z'
+    // 3日前の正午UTC（JST 21:00）= 7日以内かつ日付計算が安定
+    const d = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+    d.setUTCHours(12, 0, 0, 0)
+    const backdatedIso = d.toISOString()
+    const expectedDate = backdatedIso.slice(0, 10)
+
     const res = await taskExecuteHandler(
       CTX,
       makeReq({ taskId: 'task-1', taskExecutionId: 'exec-back', timestamp: backdatedIso }),
@@ -74,7 +78,7 @@ describe('taskExecuteHandler', () => {
     expect(res.statusCode).toBe(200)
     const [, , input] = repo.createTaskHistoryCalls[0]!
     expect(input.timestamp).toBe(backdatedIso)
-    expect(input.dailyDate).toBe('2026-05-22')
+    expect(input.dailyDate).toBe(expectedDate)
   })
 
   it('timestamp を省略した場合は現在時刻を使う', async () => {

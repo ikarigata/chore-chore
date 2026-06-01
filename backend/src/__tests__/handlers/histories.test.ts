@@ -27,12 +27,12 @@ describe('historiesHandler', () => {
     const res = await historiesHandler(CTX, REQ, { familyRepo: repo })
 
     expect(res.statusCode).toBe(200)
-    expect(res.body).toEqual({ histories: repo.histories })
+    expect(res.body).toEqual({ taskHistories: repo.histories })
   })
 
   it('履歴がない場合も 200 を返す', async () => {
     const res = await historiesHandler(CTX, REQ, { familyRepo: repo })
     expect(res.statusCode).toBe(200)
-    expect(res.body).toEqual({ histories: [] })
+    expect(res.body).toEqual({ taskHistories: [] })
   })
 })

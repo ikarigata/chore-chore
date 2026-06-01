@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AppProvider } from '../context';
 import Home from '../pages/Home';
@@ -34,7 +34,9 @@ const server = setupServer(
       return HttpResponse.json({ message: '家事を記録しました' });
     }
     return new HttpResponse(null, { status: 404 });
-  })
+  }),
+  http.get('*/negurai', () => HttpResponse.json({ negurai: [] })),
+  http.get('*/memos', () => HttpResponse.json({ memos: [] }))
 );
 
 beforeAll(() => server.listen());

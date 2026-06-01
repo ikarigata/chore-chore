@@ -49,7 +49,9 @@ const server = setupServer(
       return HttpResponse.json({ message: '家事の記録を取り消しました' });
     }
     return new HttpResponse(null, { status: 404 });
-  })
+  }),
+  http.get('*/negurai', () => HttpResponse.json({ negurai: [] })),
+  http.get('*/memos', () => HttpResponse.json({ memos: [] }))
 );
 
 beforeAll(() => server.listen());
