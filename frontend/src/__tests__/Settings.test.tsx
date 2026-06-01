@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AppProvider } from '../context';
 import Settings from '../pages/Settings';
@@ -34,7 +34,9 @@ const server = setupServer(
       return HttpResponse.json({ message: '家事設定を削除しました' });
     }
     return new HttpResponse(null, { status: 404 });
-  })
+  }),
+  http.get('*/negurai', () => HttpResponse.json({ negurai: [] })),
+  http.get('*/memos', () => HttpResponse.json({ memos: [] }))
 );
 
 beforeAll(() => server.listen());
@@ -100,10 +102,6 @@ describe('Settings Page', () => {
       expect(screen.getByText('お風呂掃除')).toBeInTheDocument();
     });
 
-    // 削除ボタンをクリック（ゴミ箱アイコンは Trash2 というコンポーネント名だが、ボタン内の aria-label や title などがないため、role で探すか、コンテナから探す必要がある。ここでは Settings.tsx を見ると button に title="削除" は付いていない。Trash2 アイコンが入っているボタンを特定する）
-    // 現状の実装を確認: <button onClick={() => handleDeleteTaskMaster(task.taskId)} ...>
-    const deleteButtons = screen.getAllByRole('button');
-    // 家事一覧の中の削除ボタン（最後の要素が削除ボタンになるはずだが、より安全に「お風呂掃除」の隣のボタンを探す）
     const taskContainer = screen.getByText('お風呂掃除').closest('div')?.parentElement;
     const deleteButton = taskContainer?.querySelector('button:last-child');
     

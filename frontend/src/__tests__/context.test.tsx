@@ -1,9 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AppProvider, useApp } from '../context';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import type { ReactNode } from 'react';
 
 // API のモック
 const server = setupServer(
@@ -38,6 +37,12 @@ const server = setupServer(
     return HttpResponse.json({
       taskHistories: [],
     });
+  }),
+  http.get('*/negurai', () => {
+    return HttpResponse.json({ negurai: [] });
+  }),
+  http.get('*/memos', () => {
+    return HttpResponse.json({ memos: [] });
   })
 );
 

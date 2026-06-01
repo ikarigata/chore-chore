@@ -21,7 +21,7 @@ describe('familyInitHandler', () => {
     expect(res.statusCode).toBe(200)
     expect(res.body).toEqual({
       users: repo.users,
-      tasks: repo.taskMasters,
+      taskMasters: repo.taskMasters,
     })
   })
 
@@ -29,7 +29,7 @@ describe('familyInitHandler', () => {
     const res = await familyInitHandler(CTX, REQ, { familyRepo: repo })
 
     expect(res.statusCode).toBe(200)
-    expect(res.body).toEqual({ users: [], tasks: [] })
+    expect(res.body).toEqual({ users: [], taskMasters: [] })
   })
 
   it('家事に categoryId がある場合、レスポンスにそのまま含まれる', async () => {
@@ -37,16 +37,16 @@ describe('familyInitHandler', () => {
 
     const res = await familyInitHandler(CTX, REQ, { familyRepo: repo })
 
-    const body = res.body as { tasks: { categoryId?: string }[] }
-    expect(body.tasks[0]?.categoryId).toBe('water')
+    const body = res.body as { taskMasters: { categoryId?: string }[] }
+    expect(body.taskMasters[0]?.categoryId).toBe('water')
   })
 
-  it('家事に categoryId がない場合（旧データ）、tasks 要素に categoryId プロパティが含まれない', async () => {
+  it('家事に categoryId がない場合（旧データ）、taskMasters 要素に categoryId プロパティが含まれない', async () => {
     repo.taskMasters = [{ taskId: 'task-1', taskName: 'お風呂掃除', points: 10 }]
 
     const res = await familyInitHandler(CTX, REQ, { familyRepo: repo })
 
-    const body = res.body as { tasks: object[] }
-    expect(body.tasks[0]).not.toHaveProperty('categoryId')
+    const body = res.body as { taskMasters: object[] }
+    expect(body.taskMasters[0]).not.toHaveProperty('categoryId')
   })
 })
