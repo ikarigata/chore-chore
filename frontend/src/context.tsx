@@ -5,12 +5,14 @@ import {
   MemoListResponseSchema,
   NeguraiListResponseSchema,
   SummaryDailyResponseSchema,
+  SummaryMonthlyResponseSchema,
   SummaryWeeklyResponseSchema,
   TaskHistoryListResponseSchema,
   type FamilyInitResponse,
   type MemoListResponse,
   type NeguraiListResponse,
   type SummaryDailyResponse,
+  type SummaryMonthlyResponse,
   type SummaryWeeklyResponse,
   type TaskHistoryListResponse,
 } from '@iezi/shared';
@@ -46,6 +48,8 @@ interface AppContextType {
   weeklySummaries: DailySummary[];
   negurai: Negurai[];
   memos: Memo[];
+  monthlySummaries: Record<string, DailySummary[]>;
+  fetchMonthlySummaries: (monthKey: string) => Promise<void>;
   updateMyProfile: (patch: { displayName?: string; icon?: string }) => Promise<void>;
   upsertTaskMaster: (task: TaskMaster) => Promise<void>;
   deleteTaskMaster: (taskId: string) => Promise<void>;
@@ -72,6 +76,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [weeklySummaries, setWeeklySummaries] = useState<DailySummary[]>([]);
   const [negurai, setNegurai] = useState<Negurai[]>([]);
   const [memos, setMemos] = useState<Memo[]>([]);
+  const [monthlySummaries, setMonthlySummaries] = useState<Record<string, DailySummary[]>>({});
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
@@ -95,6 +100,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTaskHistories(historiesData.taskHistories);
     setNegurai(neguraiData.negurai);
     setMemos(memosData.memos);
+    // 家事の追加・取消・日付変更で月次サマリが古くなるため、キャッシュを破棄して lazy 再取得させる
+    setMonthlySummaries({});
+  }, []);
+
+  const fetchMonthlySummaries = useCallback(async (monthKey: string) => {
+    const data = await apiGet<SummaryMonthlyResponse>(
+      `/summary/monthly?month=${monthKey}`,
+      SummaryMonthlyResponseSchema,
+    );
+    setMonthlySummaries(prev => ({ ...prev, [monthKey]: data.summaries }));
   }, []);
 
   useEffect(() => {
@@ -295,6 +310,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       weeklySummaries,
       negurai,
       memos,
+      monthlySummaries,
+      fetchMonthlySummaries,
       updateMyProfile,
       upsertTaskMaster,
       deleteTaskMaster,
