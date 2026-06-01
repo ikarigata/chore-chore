@@ -11,6 +11,7 @@ import { neguraiCreateHandler } from './handlers/neguraiCreate.js'
 import { neguraiDeleteHandler } from './handlers/neguraiDelete.js'
 import { neguraiListHandler } from './handlers/neguraiList.js'
 import { summaryDailyHandler } from './handlers/summaryDaily.js'
+import { summaryMonthlyHandler } from './handlers/summaryMonthly.js'
 import { summaryWeeklyHandler } from './handlers/summaryWeekly.js'
 import { taskDeleteHandler } from './handlers/taskDelete.js'
 import { taskExecuteHandler } from './handlers/taskExecute.js'
@@ -50,6 +51,7 @@ export async function route(
     case 'GET /summary':
       if (seg1 === 'daily') return summaryDailyHandler(ctx, req, deps)
       if (seg1 === 'weekly') return summaryWeeklyHandler(ctx, req, deps)
+      if (seg1 === 'monthly') return summaryMonthlyHandler(ctx, req, deps)
       break
 
     case 'GET /histories':

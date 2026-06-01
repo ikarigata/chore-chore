@@ -8,6 +8,7 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import History from './pages/History'
 import Memo from './pages/Memo'
+import Calendar from './pages/Calendar'
 import Negurai from './pages/Negurai'
 import Settings from './pages/Settings'
 import Invite from './pages/Invite'
@@ -59,6 +60,7 @@ const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: 'memo', element: <Memo /> },
       { path: 'history', element: <History /> },
+      { path: 'calendar', element: <Calendar /> },
       { path: 'negurai', element: <Negurai /> },
       { path: 'settings', element: <Settings /> },
     ],

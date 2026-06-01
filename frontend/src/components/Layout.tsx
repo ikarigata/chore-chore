@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { HandHeart, Home, ScrollText, Settings, Sparkles, StickyNote } from 'lucide-react'
+import { CalendarDays, HandHeart, Home, ScrollText, Settings, Sparkles, StickyNote } from 'lucide-react'
 import NavButton from './NavButton'
 import QrModal from './QrModal'
 import { useApp } from '../context'
@@ -17,7 +17,13 @@ export default function Layout() {
   const { members, mySub, initialized, initError } = useApp()
 
   const path = location.pathname
-  const activeTab = path === '/history' ? 'history' : path === '/settings' ? 'settings' : path === '/negurai' ? 'negurai' : path === '/memo' ? 'memo' : 'home'
+  const activeTab =
+    path === '/history' ? 'history'
+    : path === '/calendar' ? 'calendar'
+    : path === '/settings' ? 'settings'
+    : path === '/negurai' ? 'negurai'
+    : path === '/memo' ? 'memo'
+    : 'home'
   const myName = members.find(m => m.cognitoSub === mySub)?.displayName ?? ''
 
   if (!initialized) {
@@ -65,6 +71,7 @@ export default function Layout() {
         <NavButton icon={Home} label="ホーム" active={activeTab === 'home'} onClick={() => navigate('/')} />
         <NavButton icon={StickyNote} label="メモ" active={activeTab === 'memo'} onClick={() => navigate('/memo')} />
         <NavButton icon={ScrollText} label="履歴" active={activeTab === 'history'} onClick={() => navigate('/history')} />
+        <NavButton icon={CalendarDays} label="カレンダー" active={activeTab === 'calendar'} onClick={() => navigate('/calendar')} />
         <NavButton icon={HandHeart} label="ねぎらい" active={activeTab === 'negurai'} onClick={() => navigate('/negurai')} />
         <NavButton icon={Settings} label="設定" active={activeTab === 'settings'} onClick={() => navigate('/settings')} />
       </nav>
