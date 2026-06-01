@@ -8,7 +8,7 @@ export default {
       colors: {
         brand: {
           yellow: '#e1b425',
-          rose:   '#e09c91',
+          sky:    '#a8d2eb',
           teal:   '#0ca5aa',
           green:  '#167000',
         },
