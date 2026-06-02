@@ -64,7 +64,9 @@ export default function Layout() {
       </header>
 
       <main className="max-w-md mx-auto w-full">
-        <Outlet context={{ onOpenQr: () => setShowQrModal(true) } satisfies LayoutOutletContext} />
+        <div key={location.pathname} className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <Outlet context={{ onOpenQr: () => setShowQrModal(true) } satisfies LayoutOutletContext} />
+        </div>
       </main>
 
       <nav className="fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 bg-white border-t-2 border-stone-800 flex justify-around p-2 z-20">

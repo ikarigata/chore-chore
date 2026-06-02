@@ -110,7 +110,7 @@ export default function History() {
                     hour12: false,
                   }).format(ts);
                   return (
-                    <div key={item.taskExecutionId} className="relative flex items-start gap-2.5 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div key={item.taskExecutionId} className="relative flex items-start gap-2.5">
                       {/* カテゴリアイコン（カテゴリ背景色で種類を一目で識別） */}
                       <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 border-stone-800 ${cat.color} shadow shrink-0 z-10`}>
                         <cat.icon className="w-4 h-4 text-stone-700" />
