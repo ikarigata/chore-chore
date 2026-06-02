@@ -32,7 +32,7 @@ export default function DayCell({ dayNumber, isCurrentMonth, isToday, members, a
           return (
             <span
               key={m.cognitoSub}
-              className={`w-3.5 h-3.5 rounded-full ${m.color} ${flatBorder} border ${isActive ? '' : 'invisible'}`}
+              className={`w-4 h-4 rounded-full ${m.color} ${flatBorder} border ${isActive ? '' : 'invisible'}`}
               title={m.displayName}
               aria-hidden={!isActive}
             />
