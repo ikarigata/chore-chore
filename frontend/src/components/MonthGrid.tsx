@@ -44,8 +44,7 @@ export default function MonthGrid({ monthKey, members, summaries }: Props) {
       ))}
       {grid.map(dateKey => {
         const inMonth = isInMonth(dateKey, monthKey)
-        const subs = activity.get(dateKey)
-        const activeMembers = subs ? members.filter(m => subs.has(m.cognitoSub)) : []
+        const subs = activity.get(dateKey) ?? new Set<string>()
         const dayNumber = Number(dateKey.split('-')[2])
         return (
           <DayCell
@@ -53,7 +52,8 @@ export default function MonthGrid({ monthKey, members, summaries }: Props) {
             dayNumber={dayNumber}
             isCurrentMonth={inMonth}
             isToday={inMonth && dateKey === todayKey}
-            activeMembers={activeMembers}
+            members={members}
+            activeSubs={subs}
           />
         )
       })}
