@@ -5,14 +5,15 @@ interface Props {
   dayNumber: number
   isCurrentMonth: boolean
   isToday: boolean
-  activeMembers: User[]
+  members: User[]
+  activeSubs: Set<string>
 }
 
 const MAX_BADGES = 4
 
-export default function DayCell({ dayNumber, isCurrentMonth, isToday, activeMembers }: Props) {
-  const visible = activeMembers.slice(0, MAX_BADGES)
-  const overflow = activeMembers.length - visible.length
+export default function DayCell({ dayNumber, isCurrentMonth, isToday, members, activeSubs }: Props) {
+  const slots = members.slice(0, MAX_BADGES)
+  const overflow = members.length - slots.length
 
   return (
     <div
@@ -26,13 +27,17 @@ export default function DayCell({ dayNumber, isCurrentMonth, isToday, activeMemb
         {dayNumber}
       </span>
       <div className="flex flex-col gap-0.5 items-center min-h-[10px]">
-        {visible.map(m => (
-          <span
-            key={m.cognitoSub}
-            className={`w-3.5 h-3.5 rounded-full ${m.color} ${flatBorder} border`}
-            title={m.displayName}
-          />
-        ))}
+        {slots.map(m => {
+          const isActive = activeSubs.has(m.cognitoSub)
+          return (
+            <span
+              key={m.cognitoSub}
+              className={`w-4 h-4 rounded-full ${m.color} ${flatBorder} border ${isActive ? '' : 'invisible'}`}
+              title={m.displayName}
+              aria-hidden={!isActive}
+            />
+          )
+        })}
         {overflow > 0 && (
           <span className="text-[8px] font-bold leading-none text-stone-500">+{overflow}</span>
         )}
