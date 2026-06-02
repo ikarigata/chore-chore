@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { CalendarDays, HandHeart, Home, ScrollText, Settings, Sparkles, StickyNote } from 'lucide-react'
+import { CalendarDays, HandHeart, Home, ScrollText, Settings, StickyNote } from 'lucide-react'
 import NavButton from './NavButton'
 import QrModal from './QrModal'
 import { useApp } from '../context'
@@ -52,8 +52,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-amber-50 text-stone-800 font-sans pb-24">
       <header className="bg-white px-4 py-3 flex items-center justify-between border-b-2 border-stone-800 sticky top-0 z-10">
-        <h1 className="text-xl font-black tracking-wider flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-brand-yellow" />
+        <h1 className="text-xl font-black tracking-wider">
           iezi
         </h1>
         {myName && (
