@@ -17,15 +17,20 @@ export async function neguraiDeleteHandler(
     throw new AppError(400, `入力形式が正しくありません: ${result.error.message}`)
   }
 
-  const { neguraiId, timestamp, points, giverSub } = result.data
+  const { neguraiId, timestamp } = result.data
+
+  const negurai = await deps.familyRepo.getNegurai(ctx.familyId, neguraiId, timestamp)
+  if (!negurai) {
+    throw new AppError(404, '対象のねぎらいが見つかりません')
+  }
 
   // 記録者（receiverSub = ctx.cognitoSub）のみ削除可能
   // ConditionExpression で ReceiverSub チェックを行う
   await deps.familyRepo.deleteNegurai(ctx.familyId, ctx.cognitoSub, {
     neguraiId,
     timestamp,
-    points,
-    giverSub,
+    points: negurai.points,
+    giverSub: negurai.giverSub,
   })
 
   return { statusCode: 200, body: { message: 'ねぎらいの記録を取り消しました' } }

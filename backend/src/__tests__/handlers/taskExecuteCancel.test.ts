@@ -18,9 +18,11 @@ describe('taskExecuteCancelHandler', () => {
 
   it('家事履歴を取り消して 200 を返す', async () => {
     const timestamp = '2024-06-15T10:00:00.000Z'
+    repo.taskHistoryMap.set(`${timestamp}#sub-1#exec-1`, { points: 10 })
+
     const res = await taskExecuteCancelHandler(
       CTX,
-      makeReq({ taskExecutionId: 'exec-1', timestamp, points: 10 }),
+      makeReq({ taskExecutionId: 'exec-1', timestamp }),
       { familyRepo: repo },
     )
 
@@ -31,6 +33,7 @@ describe('taskExecuteCancelHandler', () => {
     expect(sub).toBe('sub-1')
     expect(input.taskExecutionId).toBe('exec-1')
     expect(input.timestamp).toBe(timestamp)
+    // points はサーバー側で DB から取得した値を使う
     expect(input.points).toBe(10)
     // タイムスタンプ 2024-06-15T10:00:00.000Z は JST では 2024-06-15（UTC+9）
     expect(input.dailyDate).toBe('2024-06-15')
@@ -39,9 +42,11 @@ describe('taskExecuteCancelHandler', () => {
   it('JST 日付の境界を正しく扱う（UTC 前日が JST 翌日）', async () => {
     // UTC 2024-06-14T15:00:00Z → JST 2024-06-15T00:00:00
     const timestamp = '2024-06-14T15:00:00.000Z'
+    repo.taskHistoryMap.set(`${timestamp}#sub-1#exec-2`, { points: 5 })
+
     await taskExecuteCancelHandler(
       CTX,
-      makeReq({ taskExecutionId: 'exec-2', timestamp, points: 5 }),
+      makeReq({ taskExecutionId: 'exec-2', timestamp }),
       { familyRepo: repo },
     )
     expect(repo.deleteTaskHistoryCalls[0]![2].dailyDate).toBe('2024-06-15')
@@ -49,17 +54,17 @@ describe('taskExecuteCancelHandler', () => {
 
   it('必須フィールドが欠けている場合 400 を投げる', async () => {
     await expect(
-      taskExecuteCancelHandler(CTX, makeReq({ taskExecutionId: 'e', timestamp: 't' }), { familyRepo: repo }),
-    ).rejects.toThrow()
+      taskExecuteCancelHandler(CTX, makeReq({ taskExecutionId: 'e' }), { familyRepo: repo }),
+    ).rejects.toThrow(AppError)
   })
 
-  it('points が負の場合 400 を投げる', async () => {
+  it('対象の家事履歴が存在しない場合 404 を投げる', async () => {
     await expect(
       taskExecuteCancelHandler(
         CTX,
-        makeReq({ taskExecutionId: 'e', timestamp: '2024-01-01T00:00:00Z', points: -1 }),
+        makeReq({ taskExecutionId: 'no-exist', timestamp: '2024-01-01T00:00:00Z' }),
         { familyRepo: repo },
       ),
-    ).rejects.toThrow(new AppError(400, 'points は0以上である必要があります'))
+    ).rejects.toThrow(new AppError(404, '対象の家事履歴が見つかりません'))
   })
 })

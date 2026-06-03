@@ -5,6 +5,8 @@ import type {
   DeleteNeguraiInput,
   CreateMemoInput,
   DeleteMemoInput,
+  GetNeguraiResult,
+  GetTaskHistoryResult,
   IFamilyRepository,
   UpsertTaskMasterInput,
 } from '../../repositories/IFamilyRepository.js'
@@ -14,6 +16,8 @@ import type {
   FamilyID,
   Memo,
   Negurai,
+  NeguraiID,
+  TaskExecutionID,
   TaskHistory,
   TaskID,
   TaskMaster,
@@ -44,6 +48,26 @@ export class MockFamilyRepository implements IFamilyRepository {
 
   async getTaskMaster(_familyId: FamilyID, taskId: TaskID): Promise<TaskMaster | null> {
     return this.taskMasterMap.get(taskId) ?? null
+  }
+
+  taskHistoryMap = new Map<string, GetTaskHistoryResult>()
+  neguraiMap = new Map<string, GetNeguraiResult>()
+
+  async getTaskHistory(
+    _familyId: FamilyID,
+    cognitoSub: CognitoSub,
+    taskExecutionId: TaskExecutionID,
+    timestamp: string,
+  ): Promise<GetTaskHistoryResult | null> {
+    return this.taskHistoryMap.get(`${timestamp}#${cognitoSub}#${taskExecutionId}`) ?? null
+  }
+
+  async getNegurai(
+    _familyId: FamilyID,
+    neguraiId: NeguraiID,
+    timestamp: string,
+  ): Promise<GetNeguraiResult | null> {
+    return this.neguraiMap.get(`${timestamp}#${neguraiId}`) ?? null
   }
 
   async getDailySummaries(_familyId: FamilyID, _date: string): Promise<DailySummary[]> {

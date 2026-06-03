@@ -193,7 +193,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await apiDelete('/tasks/execute', {
         taskExecutionId: item.taskExecutionId,
         timestamp: item.timestamp,
-        points: item.points,
       });
       await refreshAllData();
     } catch (err) {
@@ -226,8 +225,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await apiDelete('/negurai', {
         neguraiId: item.neguraiId,
         timestamp: item.timestamp,
-        points: item.points,
-        giverSub: item.giverSub,
       });
       await refreshAllData();
     } catch (err) {
@@ -276,7 +273,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await apiDelete('/tasks/execute', {
         taskExecutionId: item.taskExecutionId,
         timestamp: item.timestamp,
-        points: item.points,
       });
       const newExecutionId = crypto.randomUUID();
       const timestamp = dateKeyToTimestamp(newDateKey);

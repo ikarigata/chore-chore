@@ -18,19 +18,24 @@ export async function taskExecuteCancelHandler(
     throw new AppError(400, `入力形式が正しくありません: ${result.error.message}`)
   }
 
-  const { taskExecutionId, timestamp, points } = result.data
+  const { taskExecutionId, timestamp } = result.data
 
-  if (points < 0) {
-    throw new AppError(400, 'points は0以上である必要があります')
+  const history = await deps.familyRepo.getTaskHistory(
+    ctx.familyId,
+    ctx.cognitoSub,
+    taskExecutionId,
+    timestamp,
+  )
+  if (!history) {
+    throw new AppError(404, '対象の家事履歴が見つかりません')
   }
 
-  // 元の履歴のタイムスタンプから JST 日付を復元して DAILY SK を構築する
   const dailyDate = getJSTDateString(new Date(timestamp))
 
   await deps.familyRepo.deleteTaskHistory(ctx.familyId, ctx.cognitoSub, {
     taskExecutionId,
     timestamp,
-    points,
+    points: history.points,
     dailyDate,
   })
 

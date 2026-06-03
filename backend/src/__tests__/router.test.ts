@@ -53,7 +53,9 @@ describe('route', () => {
   })
 
   it('DELETE /tasks/execute → 200', async () => {
-    const body = { taskExecutionId: 'exec-1', timestamp: '2024-01-01T00:00:00Z', points: 5 }
+    const timestamp = '2024-01-01T00:00:00Z'
+    repo.taskHistoryMap.set(`${timestamp}#sub-1#exec-1`, { points: 5 })
+    const body = { taskExecutionId: 'exec-1', timestamp }
     const res = await route('DELETE', '/tasks/execute', CTX, makeReq({ body }), deps)
     expect(res.statusCode).toBe(200)
   })
