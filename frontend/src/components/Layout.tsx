@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { CalendarDays, HandHeart, Home, ScrollText, Settings, StickyNote } from 'lucide-react'
+import { CalendarDays, HandHeart, Home, ScrollText, StickyNote } from 'lucide-react'
 import NavButton from './NavButton'
 import QrModal from './QrModal'
 import { useApp } from '../context'
@@ -20,11 +20,11 @@ export default function Layout() {
   const activeTab =
     path === '/history' ? 'history'
     : path === '/calendar' ? 'calendar'
-    : path === '/settings' ? 'settings'
     : path === '/negurai' ? 'negurai'
     : path === '/memo' ? 'memo'
     : 'home'
-  const myName = members.find(m => m.cognitoSub === mySub)?.displayName ?? ''
+  const me = members.find(m => m.cognitoSub === mySub)
+  const isSettings = path === '/settings'
 
   if (!initialized) {
     return (
@@ -55,10 +55,14 @@ export default function Layout() {
         <h1 className="text-xl font-black tracking-wider">
           iezi
         </h1>
-        {myName && (
-          <div className={`bg-brand-yellow px-3 py-1 rounded-full font-bold text-sm ${flatBorder}`}>
-            {myName}
-          </div>
+        {me && (
+          <button
+            onClick={() => navigate('/settings')}
+            className={`flex items-center gap-2 px-3 py-1 rounded-full font-bold text-sm transition-all active:scale-95 ${isSettings ? 'bg-stone-800 text-white' : `bg-brand-yellow ${flatBorder}`}`}
+          >
+            {me.icon && <span className="text-base leading-none">{me.icon}</span>}
+            {me.displayName}
+          </button>
         )}
       </header>
 
@@ -74,7 +78,6 @@ export default function Layout() {
         <NavButton icon={ScrollText} label="履歴" active={activeTab === 'history'} onClick={() => navigate('/history')} />
         <NavButton icon={CalendarDays} label="カレンダー" active={activeTab === 'calendar'} onClick={() => navigate('/calendar')} />
         <NavButton icon={HandHeart} label="ねぎらい" active={activeTab === 'negurai'} onClick={() => navigate('/negurai')} />
-        <NavButton icon={Settings} label="設定" active={activeTab === 'settings'} onClick={() => navigate('/settings')} />
       </nav>
 
       {showQrModal && <QrModal onClose={() => setShowQrModal(false)} />}
