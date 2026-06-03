@@ -30,6 +30,10 @@ export interface DeleteTaskHistoryInput {
   dailyDate: string
 }
 
+export interface GetTaskHistoryResult {
+  points: number
+}
+
 export interface UpsertTaskMasterInput {
   taskId: TaskID
   taskName: string
@@ -53,6 +57,11 @@ export interface DeleteNeguraiInput {
   points: number
 }
 
+export interface GetNeguraiResult {
+  points: number
+  giverSub: CognitoSub
+}
+
 export interface CreateMemoInput {
   memoId: MemoID
   content: string
@@ -69,6 +78,8 @@ export interface IFamilyRepository {
   listFamilyMembers(familyId: FamilyID): Promise<User[]>
   listTaskMasters(familyId: FamilyID): Promise<TaskMaster[]>
   getTaskMaster(familyId: FamilyID, taskId: TaskID): Promise<TaskMaster | null>
+  getTaskHistory(familyId: FamilyID, cognitoSub: CognitoSub, taskExecutionId: TaskExecutionID, timestamp: string): Promise<GetTaskHistoryResult | null>
+  getNegurai(familyId: FamilyID, neguraiId: NeguraiID, timestamp: string): Promise<GetNeguraiResult | null>
   getDailySummaries(familyId: FamilyID, date: string): Promise<DailySummary[]>
   getWeeklySummaries(familyId: FamilyID, from: string, to: string): Promise<DailySummary[]>
   listTaskHistories(familyId: FamilyID): Promise<TaskHistory[]>

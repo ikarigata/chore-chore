@@ -93,7 +93,6 @@ export const TaskHistoryCreateRequestSchema = z.object({
 export const TaskHistoryDeleteRequestSchema = z.object({
   taskExecutionId: z.string(),
   timestamp: z.string(),
-  points: z.number(),
 });
 
 export const NeguraiCreateRequestSchema = z.object({
@@ -106,8 +105,6 @@ export const NeguraiCreateRequestSchema = z.object({
 export const NeguraiDeleteRequestSchema = z.object({
   neguraiId: z.string().uuid(),
   timestamp: z.string(),
-  points: z.number().int().positive(),
-  giverSub: z.string().min(1),
 });
 
 export const NeguraiListResponseSchema = z.object({

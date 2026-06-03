@@ -16,6 +16,8 @@ import type {
   DeleteNeguraiInput,
   CreateMemoInput,
   DeleteMemoInput,
+  GetNeguraiResult,
+  GetTaskHistoryResult,
   IFamilyRepository,
   UpsertTaskMasterInput,
 } from '../IFamilyRepository.js'
@@ -25,6 +27,8 @@ import type {
   FamilyID,
   Memo,
   Negurai,
+  NeguraiID,
+  TaskExecutionID,
   TaskHistory,
   TaskID,
   TaskMaster,
@@ -153,6 +157,46 @@ export class DynamoFamilyRepository implements IFamilyRepository {
     )
     if (!result.Item) return null
     return parseTaskMaster(result.Item as DynamoItem)
+  }
+
+  async getTaskHistory(
+    familyId: FamilyID,
+    cognitoSub: CognitoSub,
+    taskExecutionId: TaskExecutionID,
+    timestamp: string,
+  ): Promise<GetTaskHistoryResult | null> {
+    const result = await this.client.send(
+      new GetCommand({
+        TableName: TABLE_NAME,
+        Key: {
+          FamilyID: familyId,
+          DataSortKey: `HISTORY#${timestamp}#${cognitoSub}#${taskExecutionId}`,
+        },
+      }),
+    )
+    if (!result.Item) return null
+    return { points: result.Item['Points'] as number }
+  }
+
+  async getNegurai(
+    familyId: FamilyID,
+    neguraiId: NeguraiID,
+    timestamp: string,
+  ): Promise<GetNeguraiResult | null> {
+    const result = await this.client.send(
+      new GetCommand({
+        TableName: TABLE_NAME,
+        Key: {
+          FamilyID: familyId,
+          DataSortKey: `NEGURAI#${timestamp}#${neguraiId}`,
+        },
+      }),
+    )
+    if (!result.Item) return null
+    return {
+      points: result.Item['Points'] as number,
+      giverSub: result.Item['GiverSub'] as string,
+    }
   }
 
   async getDailySummaries(familyId: FamilyID, date: string): Promise<DailySummary[]> {
